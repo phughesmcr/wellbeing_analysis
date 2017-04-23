@@ -1,0 +1,30 @@
+{
+  "name": "wellbeing_analysis",
+  "version": "0.0.1",
+  "description": "Analyse positive / negative wellbeing expressed in English or Spanish strings.",
+  "main": "index.js",
+  "dependencies": {
+    "happynodetokenizer": "0.0.3"
+  },
+  "keywords": [
+    "psychology",
+    "positive",
+    "wellbeing",
+    "PERMA",
+    "SWL",
+    "Seligman",
+    "lexica",
+    "lexicon",
+    "mental",
+    "health",
+    "Spanish",
+    "Espanol"
+  ],
+  "author": "P. Hughes <peter@phugh.es> (http://www.phugh.es)",
+  "license": "CC-BY-NC-SA-3.0",
+  "homepage": "https://github.com/phugh/wellbeing_analysis",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/phugh/wellbeing_analysis"
+  }
+}
