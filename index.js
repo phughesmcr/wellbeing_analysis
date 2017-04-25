@@ -1,6 +1,6 @@
 /**
  * wellbeing_analysis
- * v0.0.2
+ * v0.0.3
  *
  * Analyse positive / negative wellbeing expressions in English or Spanish Strings
  *
@@ -199,7 +199,7 @@
         NEG_A: 2.482131179
       }
     }
-    console.log(int, es)
+
     // calculate lexical useage
     let wellbeing = {}
     wellbeing.POS_P = calcLex(matches.POS_P, wordcount, opts.encoding, int.POS_P)
