@@ -1,6 +1,6 @@
 /**
  * wellbeing_analysis
- * v0.0.3
+ * v0.0.4
  *
  * Analyse positive / negative wellbeing expressions in English or Spanish Strings
  *
@@ -220,6 +220,9 @@
   const wellbeingAnalysis = (str, opts) => {
     // return null if no string
     if (str == null) return null
+
+    // trim whitespace and convert to lowercase
+    str = str.toLowerCase().trim()
 
     // option defaults
     if (opts == null) {
