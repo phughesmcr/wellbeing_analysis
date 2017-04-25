@@ -14,6 +14,8 @@ let text = "A long string of text...."
 let wellbeing = wba(text, opts)
 ```
 
+Errors return null
+
 ## Options
 #### "lang"
 "english" (default), or "spanish" - language of the lexicon to use.
@@ -62,6 +64,6 @@ Using the gender lexicon data from http://www.wwbp.org/lexica.html
 
 Used under the Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported licence
 
-# Licence
+## Licence
 (C) 2017 P. Hughes
 [Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported](http://creativecommons.org/licenses/by-nc-sa/3.0/)
