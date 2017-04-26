@@ -1,6 +1,6 @@
 /**
  * wellbeing_analysis
- * v0.0.4
+ * v0.1.0
  *
  * Analyse positive / negative wellbeing expressions in English or Spanish Strings
  *
@@ -72,24 +72,25 @@
   */
   const getMatches = (arr, lexicon, threshold) => {
     let matches = {}
-
     // loop through the lexicon categories
-    for (let cat in lexicon) {
+    let cat
+    for (cat in lexicon) {
       if (!lexicon.hasOwnProperty(cat)) continue
       let match = []
-
       // loop through words in category
-      for (let key in lexicon[cat]) {
-        if (!lexicon[cat].hasOwnProperty(key)) continue
-        let weight = lexicon[cat][key]
-
+      let data = lexicon[cat]
+      let key
+      for (key in data) {
+        if (!data.hasOwnProperty(key)) continue
+        let weight = data[key]
         // if word from input matches word from lexicon ...
         if (arr.indexOf(key) > -1 && weight > threshold) {
           let item
           let reps = arr.indexesOf(key).length // numbder of times the word appears in the input text
           if (reps > 1) { // if the word appears more than once, group all appearances in one array
             let words = []
-            for (let i = 0; i < reps; i++) {
+            let i
+            for (i = 0; i < reps; i++) {
               words.push(key)
             }
             item = [words, weight]
@@ -101,7 +102,6 @@
       }
       matches[cat] = match
     }
-
     // return matches object
     return matches
   }
@@ -117,9 +117,9 @@
   const calcLex = (obj, wc, encoding, int) => {
     let counts = []   // number of matched objects
     let weights = []  // weights of matched objects
-
     // loop through the matches and get the word frequency (counts) and weights
-    for (let key in obj) {
+    let key
+    for (key in obj) {
       if (!obj.hasOwnProperty(key)) continue
       if (Array.isArray(obj[key][0])) { // if the first item in the match is an array, the item is a duplicate
         counts.push(obj[key][0].length) // for duplicate matches
@@ -128,30 +128,19 @@
       }
       weights.push(obj[key][1])         // corresponding weight
     }
-
     // calculate lexical usage value
-    let sums = []
+    let lex = 0
     counts.forEach(function (a, b) {
-      let sum
       if (encoding === 'frequency') {
         // (word frequency / total word count) * weight
-        sum = (a / wc) * weights[b]
+        lex += (a / wc) * weights[b]
       } else {
         // weight + weight + weight etc
-        sum = weights[b]
+        lex += weights[b]
       }
-      sums.push(sum)
     })
-
-    // get sum of values
-    let lex
-    lex = sums.reduce(function (a, b) { return a + b }, 0)
-
-    // add the intercept value
-    lex = Number(lex) + Number(int)
-
-    // return final lexical value
-    return lex
+    // return final lexical value + intercept
+    return lex + int
   }
 
   /**
@@ -165,13 +154,10 @@
     let lexicon = english
     let es = (opts.lang.match(/(spanish|espanol)/gi))
     if (es) lexicon = spanish
-
     // get matches from array
     const matches = getMatches(arr, lexicon, opts.threshold)
-
     // get wordcount
     const wordcount = arr.length
-
     // set intercept value
     let int = {
       POS_P: 0,
@@ -199,7 +185,6 @@
         NEG_A: 2.482131179
       }
     }
-
     // calculate lexical useage
     let wellbeing = {}
     wellbeing.POS_P = calcLex(matches.POS_P, wordcount, opts.encoding, int.POS_P)
@@ -212,7 +197,6 @@
     wellbeing.NEG_R = calcLex(matches.NEG_R, wordcount, opts.encoding, int.NEG_R)
     wellbeing.NEG_M = calcLex(matches.NEG_M, wordcount, opts.encoding, int.NEG_M)
     wellbeing.NEG_A = calcLex(matches.NEG_A, wordcount, opts.encoding, int.NEG_A)
-
     // return wellbeing object
     return wellbeing
   }
@@ -220,10 +204,10 @@
   const wellbeingAnalysis = (str, opts) => {
     // return null if no string
     if (str == null) return null
-
+    // make sure str is a string
+    if (typeof str !== 'string') str = str.toString()
     // trim whitespace and convert to lowercase
     str = str.toLowerCase().trim()
-
     // option defaults
     if (opts == null) {
       opts = {
@@ -235,13 +219,10 @@
     opts.lang = opts.lang || 'english'
     opts.threshold = opts.threshold || -999
     opts.encoding = opts.encoding || 'binary'
-
     // convert our string to tokens
     const tokens = tokenizer(str)
-
     // return null on no tokens
     if (tokens == null) return null
-
     // predict and return
     return analyse(tokens, opts)
   }
