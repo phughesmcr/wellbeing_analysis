@@ -1,6 +1,6 @@
 /**
  * wellbeing_analysis
- * v0.1.0
+ * v0.1.1
  *
  * Analyse positive / negative wellbeing expressions in English or Spanish Strings
  *
@@ -139,8 +139,10 @@
         lex += weights[b]
       }
     })
+    // add int
+    lex = lex + int
     // return final lexical value + intercept
-    return lex + int
+    return lex
   }
 
   /**
