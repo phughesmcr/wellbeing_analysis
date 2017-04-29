@@ -1,6 +1,6 @@
 /**
  * wellbeing_analysis
- * v0.1.1
+ * v0.1.2
  *
  * Analyse positive / negative wellbeing expressions in English or Spanish Strings
  *
@@ -130,17 +130,19 @@
     }
     // calculate lexical usage value
     let lex = 0
-    counts.forEach(function (a, b) {
+    let i
+    let len = counts.length
+    for (i = 0; i < len; i++) {
       if (encoding === 'frequency') {
         // (word frequency / total word count) * weight
-        lex += (a / wc) * weights[b]
+        lex += (counts[i] / wc) * weights[i]
       } else {
         // weight + weight + weight etc
-        lex += weights[b]
+        lex += weights[i]
       }
-    })
-    // add int
-    lex = lex + int
+    }
+    // add intercept value
+    lex += int
     // return final lexical value + intercept
     return lex
   }

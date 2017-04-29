@@ -1,10 +1,10 @@
 {
   "name": "wellbeing_analysis",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Analyse positive / negative wellbeing expressed in English or Spanish strings.",
   "main": "index.js",
   "dependencies": {
-    "happynodetokenizer": "^0.0.4"
+    "happynodetokenizer": "^0.1.0"
   },
   "keywords": [
     "psychology",
@@ -18,7 +18,8 @@
     "mental",
     "health",
     "Spanish",
-    "Espanol"
+    "Espanol",
+    "sentiment"
   ],
   "author": "P. Hughes <peter@phugh.es> (http://www.phugh.es)",
   "license": "CC-BY-NC-SA-3.0",
