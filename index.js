@@ -1,6 +1,6 @@
 /**
  * wellbeing_analysis
- * v0.1.2
+ * v0.1.3
  *
  * Analyse positive / negative wellbeing expressions in English or Spanish Strings
  *
@@ -29,8 +29,8 @@
  * console.log(wellbeing)
  *
  * @param {string} str  {input string}
- * @param {object} opts {options}
- * @return {object} {predicted gender}
+ * @param {Object} opts {options}
+ * @return {Object} {predicted gender}
  */
 
 'use strict'
@@ -54,8 +54,9 @@
 
   // get number of times el appears in an array
   Array.prototype.indexesOf = function (el) {
-    var idxs = []
-    for (var i = this.length - 1; i >= 0; i--) {
+    const idxs = []
+    let i = this.length - 1
+    for (i; i >= 0; i--) {
       if (this[i] === el) {
         idxs.unshift(i)
       }
@@ -65,13 +66,13 @@
 
   /**
   * @function getMatches
-  * @param  {arr} arr       {token array}
-  * @param  {obj} lexicon   {lexicon object}
-  * @param  {number} threshold {min. weight threshold}
-  * @return {object} {object of matches}
+  * @param  {Array} arr         token array
+  * @param  {Object} lexicon    lexicon object
+  * @param  {number} threshold  min. weight threshold
+  * @return {Object}  object of matches
   */
   const getMatches = (arr, lexicon, threshold) => {
-    let matches = {}
+    const matches = {}
     // loop through the lexicon categories
     let cat
     for (cat in lexicon) {
@@ -108,15 +109,15 @@
 
   /**
   * @function calcLex
-  * @param  {object} obj      {matches object}
-  * @param  {number} wc       {wordcount}
-  * @param  {string} encoding {word encoding: 'binary' or 'frequency'}
-  * @param  {number} int      {intercept value}
-  * @return {number} {lexical value}
+  * @param  {Object} obj      matches object
+  * @param  {number} wc       word count
+  * @param  {string} encoding word encoding: 'binary' or 'frequency'
+  * @param  {number} int      intercept value
+  * @return {number}  lexical value
   */
   const calcLex = (obj, wc, encoding, int) => {
-    let counts = []   // number of matched objects
-    let weights = []  // weights of matched objects
+    const counts = []   // number of matched objects
+    const weights = []  // weights of matched objects
     // loop through the matches and get the word frequency (counts) and weights
     let key
     for (key in obj) {
@@ -131,27 +132,30 @@
     // calculate lexical usage value
     let lex = 0
     let i
-    let len = counts.length
+    const len = counts.length
+    const words = Number(wc)
     for (i = 0; i < len; i++) {
+      let weight = Number(weights[i])
       if (encoding === 'frequency') {
+        let count = Number(counts[i])
         // (word frequency / total word count) * weight
-        lex += (counts[i] / wc) * weights[i]
+        lex += (count / words) * weight
       } else {
         // weight + weight + weight etc
-        lex += weights[i]
+        lex += weight
       }
     }
     // add intercept value
-    lex += int
+    lex += Number(int)
     // return final lexical value + intercept
-    return lex
+    return Number(lex)
   }
 
   /**
   * @function analyse
-  * @param  {array} arr  {array of tokens}
-  * @param  {object} opts {options}
-  * @return {object} {wellbeing object}
+  * @param  {Array} arr   array of tokens
+  * @param  {Object} opts options
+  * @return {Object}  wellbeing object
   */
   const analyse = (arr, opts) => {
     // pick the right lexicon language
@@ -162,6 +166,8 @@
     const matches = getMatches(arr, lexicon, opts.threshold)
     // get wordcount
     const wordcount = arr.length
+    // get encoding
+    const enc = opts.encoding
     // set intercept value
     let int = {
       POS_P: 0,
@@ -190,17 +196,17 @@
       }
     }
     // calculate lexical useage
-    let wellbeing = {}
-    wellbeing.POS_P = calcLex(matches.POS_P, wordcount, opts.encoding, int.POS_P)
-    wellbeing.POS_E = calcLex(matches.POS_E, wordcount, opts.encoding, int.POS_E)
-    wellbeing.POS_R = calcLex(matches.POS_R, wordcount, opts.encoding, int.POS_R)
-    wellbeing.POS_M = calcLex(matches.POS_M, wordcount, opts.encoding, int.POS_M)
-    wellbeing.POS_A = calcLex(matches.POS_A, wordcount, opts.encoding, int.POS_A)
-    wellbeing.NEG_P = calcLex(matches.NEG_P, wordcount, opts.encoding, int.NEG_P)
-    wellbeing.NEG_E = calcLex(matches.NEG_E, wordcount, opts.encoding, int.NEG_E)
-    wellbeing.NEG_R = calcLex(matches.NEG_R, wordcount, opts.encoding, int.NEG_R)
-    wellbeing.NEG_M = calcLex(matches.NEG_M, wordcount, opts.encoding, int.NEG_M)
-    wellbeing.NEG_A = calcLex(matches.NEG_A, wordcount, opts.encoding, int.NEG_A)
+    const wellbeing = {}
+    wellbeing.POS_P = calcLex(matches.POS_P, wordcount, enc, int.POS_P)
+    wellbeing.POS_E = calcLex(matches.POS_E, wordcount, enc, int.POS_E)
+    wellbeing.POS_R = calcLex(matches.POS_R, wordcount, enc, int.POS_R)
+    wellbeing.POS_M = calcLex(matches.POS_M, wordcount, enc, int.POS_M)
+    wellbeing.POS_A = calcLex(matches.POS_A, wordcount, enc, int.POS_A)
+    wellbeing.NEG_P = calcLex(matches.NEG_P, wordcount, enc, int.NEG_P)
+    wellbeing.NEG_E = calcLex(matches.NEG_E, wordcount, enc, int.NEG_E)
+    wellbeing.NEG_R = calcLex(matches.NEG_R, wordcount, enc, int.NEG_R)
+    wellbeing.NEG_M = calcLex(matches.NEG_M, wordcount, enc, int.NEG_M)
+    wellbeing.NEG_A = calcLex(matches.NEG_A, wordcount, enc, int.NEG_A)
     // return wellbeing object
     return wellbeing
   }
