@@ -1,6 +1,6 @@
 /**
  * wellbeing_analysis
- * v0.1.3
+ * v0.1.4
  *
  * Analyse positive / negative wellbeing expressions in English or Spanish Strings
  *
@@ -25,7 +25,7 @@
  *  "encoding": "binary"
  * }
  * const text = "A big long string of text...";
- * let wellbeing = wba(text, opts);
+ * const wellbeing = wba(text, opts);
  * console.log(wellbeing)
  *
  * @param {string} str  {input string}
@@ -38,13 +38,12 @@
   const root = this
   const previous = root.wellbeingAnalysis
 
-  const hasRequire = typeof require !== 'undefined'
-
   let tokenizer = root.tokenizer
   let english = root.english
   let spanish = root.spanish
 
-  if (typeof _ === 'undefined') {
+  if (typeof tokenizer === 'undefined') {
+    const hasRequire = typeof require !== 'undefined'
     if (hasRequire) {
       tokenizer = require('happynodetokenizer')
       english = require('./data/english.json')
@@ -74,12 +73,12 @@
   const getMatches = (arr, lexicon, threshold) => {
     const matches = {}
     // loop through the lexicon categories
-    let cat
-    for (cat in lexicon) {
-      if (!lexicon.hasOwnProperty(cat)) continue
+    let category
+    for (category in lexicon) {
+      if (!lexicon.hasOwnProperty(category)) continue
       let match = []
       // loop through words in category
-      let data = lexicon[cat]
+      let data = lexicon[category]
       let key
       for (key in data) {
         if (!data.hasOwnProperty(key)) continue
@@ -101,7 +100,7 @@
           match.push(item)
         }
       }
-      matches[cat] = match
+      matches[category] = match
     }
     // return matches object
     return matches
@@ -133,22 +132,21 @@
     let lex = 0
     let i
     const len = counts.length
-    const words = Number(wc)
     for (i = 0; i < len; i++) {
       let weight = Number(weights[i])
       if (encoding === 'frequency') {
         let count = Number(counts[i])
         // (word frequency / total word count) * weight
-        lex += (count / words) * weight
+        lex += (count / wc) * weight
       } else {
         // weight + weight + weight etc
         lex += weight
       }
     }
     // add intercept value
-    lex += Number(int)
+    lex += int
     // return final lexical value + intercept
-    return Number(lex)
+    return lex
   }
 
   /**
@@ -169,18 +167,7 @@
     // get encoding
     const enc = opts.encoding
     // set intercept value
-    let int = {
-      POS_P: 0,
-      POS_E: 0,
-      POS_R: 0,
-      POS_M: 0,
-      POS_A: 0,
-      NEG_P: 0,
-      NEG_E: 0,
-      NEG_R: 0,
-      NEG_M: 0,
-      NEG_A: 0
-    }
+    let int
     if (es) {
       int = {
         POS_P: 2.675173871,
@@ -194,7 +181,21 @@
         NEG_M: 1.52890284,
         NEG_A: 2.482131179
       }
+    } else {
+      int = {
+        POS_P: 0,
+        POS_E: 0,
+        POS_R: 0,
+        POS_M: 0,
+        POS_A: 0,
+        NEG_P: 0,
+        NEG_E: 0,
+        NEG_R: 0,
+        NEG_M: 0,
+        NEG_A: 0
+      }
     }
+
     // calculate lexical useage
     const wellbeing = {}
     wellbeing.POS_P = calcLex(matches.POS_P, wordcount, enc, int.POS_P)
