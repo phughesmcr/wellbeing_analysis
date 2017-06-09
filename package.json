@@ -1,10 +1,11 @@
 {
   "name": "wellbeing_analysis",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "description": "Analyse positive / negative wellbeing expressed in English or Spanish strings.",
   "main": "index.js",
   "dependencies": {
-    "happynodetokenizer": "^0.1.1"
+    "happynodetokenizer": "^0.1.1",
+    "natural": "^0.5.1"
   },
   "keywords": [
     "psychology",
