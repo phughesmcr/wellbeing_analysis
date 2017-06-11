@@ -6,10 +6,10 @@ Analyse positive / negative [PERMA](https://en.wikipedia.org/wiki/Martin_Seligma
 ```Javascript
 const wba = require('wellbeing_analysis')
 const opts = {
-       "lang": "english",
-  "threshold": -0.37,
-    "bigrams": true,  // match against bigrams too?
-   "trigrams": true   // match against trigrams too?
+       "lang": "english", // "english" or "spanish" / "espanol"
+  "threshold": -0.38,     // value between -0.38 (default) & 0.86 for English, and -0.86 (default) & 3.35 for Spanish
+    "bigrams": true,      // match against bigrams too?
+   "trigrams": true       // match against trigrams too?
 }
 let text = "A long string of text...."
 let wellbeing = wba(text, opts)
@@ -29,6 +29,8 @@ Each item in the lexicon data has an associated weight (number). A higher thresh
 For English, -0.37 (default) will include everything from the lexicon, 0.85 will include nothing.
 
 For Spanish, -0.85 (default) will include everything from the lexicon, 3.32 will include nothing.
+
+If a threshold is not specified the module will default to -999 to ensure everything is included.
 
 ### "bigrams" and "trigrams"
 boolean - true / false

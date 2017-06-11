@@ -1,8 +1,8 @@
 /**
  * wellbeing_analysis
- * v0.2.0
+ * v0.2.1
  *
- * Analyse positive / negative wellbeing expressions in English or Spanish Strings
+ * Analyse positive / negative wellbeing expression in English or Spanish strings
  *
  * Help me make this better:
  * https://github.com/phugh/wellbeing_analysis
@@ -20,10 +20,10 @@
  * Usage example:
  * const wba = require('wellbeing_analysis);
  * const opts = {
- *  "lang": "english",
- *  "threshold": -0.2,
- *  "bigrams": true,
- *  "trigrams": true
+ *  "lang": "english",    // "english" or "spanish" / "espanol"
+ *  "threshold": -0.38,   // value between -0.38 (default) & 0.86 for English, and -0.86 (default) & 3.35 for Spanish
+ *  "bigrams": true,      // match against bigrams in lexicon (not recommended for large strings)
+ *  "trigrams": true      // match against trigrams in lexicon (not recommended for large strings)
  * }
  * const text = "A big long string of text...";
  * const wellbeing = wba(text, opts);
@@ -52,18 +52,6 @@
       spanish = require('./data/spanish.json')
       natural = require('natural')
     } else throw new Error('wellbeingAnalysis requires happynodetokenizer, natural and associated lexica files.')
-  }
-
-  // get number of times el appears in an array
-  Array.prototype.indexesOf = function (el) {
-    const idxs = []
-    let i = this.length - 1
-    for (i; i >= 0; i--) {
-      if (this[i] === el) {
-        idxs.unshift(i)
-      }
-    }
-    return idxs
   }
 
   /**
@@ -123,19 +111,7 @@
         let weight = data[key]
         // if word from input matches word from lexicon ...
         if (arr.indexOf(key) > -1 && weight > threshold) {
-          let item
-          let reps = arr.indexesOf(key).length // numbder of times the word appears in the input text
-          if (reps > 1) { // if the word appears more than once, group all appearances in one array
-            let words = []
-            let i
-            for (i = 0; i < reps; i++) {
-              words.push(key)
-            }
-            item = [words, weight]
-          } else {
-            item = [key, weight]
-          }
-          match.push(item)
+          match.push([key, weight])
         }
       }
       matches[category] = match
@@ -239,9 +215,7 @@
       }
     }
     opts.lang = opts.lang || 'english'
-    opts.threshold = opts.threshold || -999
-    opts.bigrams = opts.bigrams || true
-    opts.trigrams = opts.trigrams || true
+    opts.threshold = opts.threshold || -999 // default to -999 in order to include everything
     // convert our string to tokens
     let tokens = tokenizer(str)
     // return null on no tokens
