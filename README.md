@@ -2,17 +2,25 @@
 
 Analyse positive / negative [PERMA](https://en.wikipedia.org/wiki/Martin_Seligman#PERMA) expressions in English or Spanish Strings
 
+![Standard - JavaScript Style Guide](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)
+
+## Disclaimer
+
+Wellbeing_Analysis is provided for educational and entertainment purposes only, it does not provide and is not a substitute for medical advice or diagnosis.
+
 ## Usage
-```Javascript
+```javascript
 const wba = require('wellbeing_analysis')
 const opts = {
        "lang": "english", // "english" or "spanish" / "espanol"
+   'encoding': 'binary',  // 'binary' (default), or 'frequency' - type of word encoding to use.
   "threshold": -0.38,     // value between -0.38 (default) & 0.86 for English, and -0.86 (default) & 3.35 for Spanish
     "bigrams": true,      // match against bigrams too?
    "trigrams": true       // match against trigrams too?
 }
-let text = "A long string of text...."
-let wellbeing = wba(text, opts)
+const str = "A long string of text...."
+const wellbeing = wba(str, opts)
+console.log(wellbeing)
 ```
 
 Errors return null
@@ -32,12 +40,21 @@ For Spanish, -0.85 (default) will include everything from the lexicon, 3.32 will
 
 If a threshold is not specified the module will default to -999 to ensure everything is included.
 
-### "bigrams" and "trigrams"
-boolean - true / false
+### 'encoding'
 
-The PERMA lexicon contains bigrams and trigrams, matching against these gives more accurate results but requires more processing time.
+Valid options: 'binary' (default), or 'frequency'.
 
-Enabled by default, but we recommend you disable them for very long strings.
+'binary' calculates the lexical value as simply a sum of weights, i.e. weight[1] + weight[2] + etc...
+
+'frequency' calculates the lexical value as (word frequency / total wordcount) * word weight
+
+Unless you have a specific need for frequency encoding, we recommend you use binary only.
+
+### 'bigrams' and 'trigrams'
+
+Boolean.
+
+The lexicon includes strings that are between one and three words in length. By default we will match against these using bi-grams and tri-grams, however you may want to disable these when analysing very long strings to save processing time and memory use.
 
 ## Output Example
 wellbeing_analysis outputs an object containing the lexical usage values for each of the PERMA domains, both positive and negative.
@@ -65,8 +82,9 @@ Schwartz, H. A., Eichstaedt, J. C., Kern, M. L., Dziurzynski, L., Ramones, S. M.
 ### Lexicon
 Using the gender lexicon data from http://www.wwbp.org/lexica.html
 
-Used under the Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported licence
+Used under the [Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported](http://creativecommons.org/licenses/by-nc-sa/3.0/)
 
 ## Licence
-(C) 2017 P. Hughes
+(C) 2017 [P. Hughes](www.phugh.es)
+
 [Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported](http://creativecommons.org/licenses/by-nc-sa/3.0/)

@@ -1,6 +1,6 @@
 /**
  * wellbeing_analysis
- * v0.2.1
+ * v0.3.0
  *
  * Analyse positive / negative wellbeing expression in English or Spanish strings
  *
@@ -21,17 +21,18 @@
  * const wba = require('wellbeing_analysis);
  * const opts = {
  *  "lang": "english",    // "english" or "spanish" / "espanol"
+ *  "encoding": "binary", // "binary" (default), or "frequency" - type of word encoding to use.
  *  "threshold": -0.38,   // value between -0.38 (default) & 0.86 for English, and -0.86 (default) & 3.35 for Spanish
  *  "bigrams": true,      // match against bigrams in lexicon (not recommended for large strings)
  *  "trigrams": true      // match against trigrams in lexicon (not recommended for large strings)
  * }
- * const text = "A big long string of text...";
- * const wellbeing = wba(text, opts);
+ * const str = "A big long string of text...";
+ * const wellbeing = wba(str, opts);
  * console.log(wellbeing)
  *
- * @param {string} str  {input string}
- * @param {Object} opts {options}
- * @return {Object} {PERMA object}
+ * @param {string} str  input string
+ * @param {Object} opts options object
+ * @return {Object} PERMA object
  */
 
 'use strict'
@@ -45,8 +46,7 @@
   let natural = root.natural
 
   if (typeof tokenizer === 'undefined') {
-    const hasRequire = typeof require !== 'undefined'
-    if (hasRequire) {
+    if (typeof require !== 'undefined') {
       tokenizer = require('happynodetokenizer')
       english = require('./data/english.json')
       spanish = require('./data/spanish.json')
@@ -54,64 +54,68 @@
     } else throw new Error('wellbeingAnalysis requires happynodetokenizer, natural and associated lexica files.')
   }
 
+  // Find how many times an element appears in an array
+  Array.prototype.indexesOf = function (el) {
+    const idxs = []
+    let i = this.length - 1
+    for (i; i >= 0; i--) {
+      if (this[i] === el) {
+        idxs.unshift(i)
+      }
+    }
+    return idxs
+  }
+
   /**
-  * @function getBigrams
-  * @param  {string} str input string
-  * @return {Array} array of bigram strings
+  * Get all the n-grams of a string and return as an array
+  * @function getNGrams
+  * @param {string} str input string
+  * @param {number} n abitrary n-gram number, e.g. 2 = bigrams
+  * @return {Array} array of ngram strings
   */
-  const getBigrams = str => {
-    const NGrams = natural.NGrams
-    const bigrams = NGrams.bigrams(str)
+  const getNGrams = (str, n) => {
+    // default to bi-grams on null n
+    if (n == null) n = 2
+    if (typeof n !== 'number') n = Number(n)
+    const ngrams = natural.NGrams.ngrams(str, n)
+    const len = ngrams.length
     const result = []
-    const len = bigrams.length
     let i = 0
     for (i; i < len; i++) {
-      result.push(bigrams[i].join(' '))
+      result.push(ngrams[i].join(' '))
     }
     return result
   }
 
   /**
-  * @function getTrigrams
-  * @param  {string} str input string
-  * @return {Array} array of trigram strings
-  */
-  const getTrigrams = str => {
-    const NGrams = natural.NGrams
-    const trigrams = NGrams.trigrams(str)
-    const result = []
-    const len = trigrams.length
-    let i = 0
-    for (i; i < len; i++) {
-      result.push(trigrams[i].join(' '))
-    }
-    return result
-  }
-
-  /**
-  * Get lexicon matches from array. Return object of matches and weights.
+  * Loop through lexicon and match against array
   * @function getMatches
-  * @param  {Array} arr         token array
-  * @param  {Object} lexicon    lexicon object
-  * @param  {number} threshold  min. weight threshold
-  * @return {Object}  object of matches
+  * @param {Array} arr token array
+  * @param {Object} lexicon lexicon object
+  * @param {number} threshold min. weight threshold
+  * @return {Object} object of matches
   */
   const getMatches = (arr, lexicon, threshold) => {
+    // error prevention
+    if (arr == null) return null
+    if (threshold == null) threshold = -999
+    if (typeof threshold !== 'number') threshold = Number(threshold)
+    // loop through categories in lexicon
     const matches = {}
-    // loop through the lexicon categories
     let category
     for (category in lexicon) {
       if (!lexicon.hasOwnProperty(category)) continue
       let match = []
-      // loop through words in category
+      let word
       let data = lexicon[category]
-      let key
-      for (key in data) {
-        if (!data.hasOwnProperty(key)) continue
-        let weight = data[key]
+      // loop through words in category
+      for (word in data) {
+        if (!data.hasOwnProperty(word)) continue
+        let weight = data[word]
         // if word from input matches word from lexicon ...
-        if (arr.indexOf(key) > -1 && weight > threshold) {
-          match.push([key, weight])
+        if (arr.indexOf(word) > -1 && weight > threshold) {
+          let count = arr.indexesOf(word).length // number of times the word appears in the input text
+          match.push([word, count, weight])
         }
       }
       matches[category] = match
@@ -120,33 +124,40 @@
   }
 
   /**
-  * Loop through object and add up lexical weights
+  * Calculate the total lexical value of matches
   * @function calcLex
-  * @param  {Object} obj      matches object
-  * @param  {number} int      intercept value
-  * @return {number}  lexical value
+  * @param {Object} obj matches object
+  * @param {number} wc wordcount
+  * @param {number} int intercept value
+  * @param {string} enc encoding
+  * @return {number} lexical value
   */
-  const calcLex = (obj, int) => {
+  const calcLex = (obj, wc, int, enc) => {
+    if (obj == null) return null
     let lex = 0
-    // add weights
-    let key
-    for (key in obj) {
-      if (!obj.hasOwnProperty(key)) continue
-      lex += Number(obj[key][1])  // weight
+    let word
+    for (word in obj) {
+      if (!obj.hasOwnProperty(word)) continue
+      if (enc === 'binary' || enc == null || wc == null) {
+        // weight + weight + weight etc
+        lex += Number(obj[word][2])
+      } else {
+        // (frequency / wordcount) * weight
+        lex += (Number(obj[word][1]) / Number(wc)) * Number(obj[word][2])
+      }
     }
-    // add intercept value
-    lex += int
-    // return final lexical value
+    if (int != null) lex += Number(int)
     return lex
   }
 
   /**
   * @function analyse
-  * @param  {Array} arr   array of tokens
-  * @param  {Object} opts options
-  * @return {Object}  wellbeing object
+  * @param {Array} arr array of tokens
+  * @param {Object} opts options
+  * @param {number} wc wordcound
+  * @return {Object} wellbeing object
   */
-  const analyse = (arr, opts) => {
+  const analyse = (arr, opts, wc) => {
     // pick the right lexicon language
     let lexicon = english
     let es = (opts.lang.match(/(spanish|espanol)/gi))
@@ -183,21 +194,28 @@
       }
     }
     // calculate lexical useage
+    const enc = opts.encoding
     const wellbeing = {}
-    wellbeing.POS_P = calcLex(matches.POS_P, int.POS_P)
-    wellbeing.POS_E = calcLex(matches.POS_E, int.POS_E)
-    wellbeing.POS_R = calcLex(matches.POS_R, int.POS_R)
-    wellbeing.POS_M = calcLex(matches.POS_M, int.POS_M)
-    wellbeing.POS_A = calcLex(matches.POS_A, int.POS_A)
-    wellbeing.NEG_P = calcLex(matches.NEG_P, int.NEG_P)
-    wellbeing.NEG_E = calcLex(matches.NEG_E, int.NEG_E)
-    wellbeing.NEG_R = calcLex(matches.NEG_R, int.NEG_R)
-    wellbeing.NEG_M = calcLex(matches.NEG_M, int.NEG_M)
-    wellbeing.NEG_A = calcLex(matches.NEG_A, int.NEG_A)
+    wellbeing.POS_P = calcLex(matches.POS_P, wc, int.POS_P, enc)
+    wellbeing.POS_E = calcLex(matches.POS_E, wc, int.POS_E, enc)
+    wellbeing.POS_R = calcLex(matches.POS_R, wc, int.POS_R, enc)
+    wellbeing.POS_M = calcLex(matches.POS_M, wc, int.POS_M, enc)
+    wellbeing.POS_A = calcLex(matches.POS_A, wc, int.POS_A, enc)
+    wellbeing.NEG_P = calcLex(matches.NEG_P, wc, int.NEG_P, enc)
+    wellbeing.NEG_E = calcLex(matches.NEG_E, wc, int.NEG_E, enc)
+    wellbeing.NEG_R = calcLex(matches.NEG_R, wc, int.NEG_R, enc)
+    wellbeing.NEG_M = calcLex(matches.NEG_M, wc, int.NEG_M, enc)
+    wellbeing.NEG_A = calcLex(matches.NEG_A, wc, int.NEG_A, enc)
     // return wellbeing object
     return wellbeing
   }
 
+  /**
+  * @function wellbeingAnalysis
+  * @param {string} str  input string
+  * @param {Object} opts options object
+  * @return {Object} PERMA object
+  */
   const wellbeingAnalysis = (str, opts) => {
     // return null if no string
     if (str == null) return null
@@ -209,29 +227,33 @@
     if (opts == null) {
       opts = {
         'lang': 'english',    // lexicon to analyse against
+        'encoding': 'binary', // word encoding
         'threshold': -999,    // minimum weight threshold
         'bigrams': true,      // match bigrams?
         'trigrams': true      // match trigrams?
       }
     }
+    opts.encoding = opts.encoding || 'binary'
     opts.lang = opts.lang || 'english'
     opts.threshold = opts.threshold || -999 // default to -999 in order to include everything
     // convert our string to tokens
     let tokens = tokenizer(str)
     // return null on no tokens
     if (tokens == null) return null
-    // handle bigrams if wanted
+    // get wordcount before we add n-grams
+    const wordcount = tokens.length
+    // handle bi-grams if wanted
     if (opts.bigrams) {
-      const bigrams = getBigrams(str)
+      const bigrams = getNGrams(str, 2)
       tokens = tokens.concat(bigrams)
     }
-    // handle trigrams if wanted
+    // handle tri-grams if wanted
     if (opts.trigrams) {
-      const trigrams = getTrigrams(str)
+      const trigrams = getNGrams(str, 3)
       tokens = tokens.concat(trigrams)
     }
     // predict and return
-    return analyse(tokens, opts)
+    return analyse(tokens, opts, wordcount)
   }
 
   wellbeingAnalysis.noConflict = function () {
