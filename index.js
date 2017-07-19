@@ -1,8 +1,11 @@
 /**
  * wellbeing_analysis
- * v0.3.0
+ * v0.3.1
  *
  * Analyse positive / negative wellbeing expression in English or Spanish strings
+ *
+ * DISCLAIMER
+ * Wellbeing_Analysis is provided for educational and entertainment purposes only. It does not provide, and is not a substitute for, medical advice or diagnosis.
  *
  * Help me make this better:
  * https://github.com/phugh/wellbeing_analysis
@@ -18,17 +21,18 @@
  * http://creativecommons.org/licenses/by-nc-sa/3.0/
  *
  * Usage example:
- * const wba = require('wellbeing_analysis);
+ * const wba = require("wellbeing_analysis");
  * const opts = {
+ *  // options are case sensitive
  *  "lang": "english",    // "english" or "spanish" / "espanol"
  *  "encoding": "binary", // "binary" (default), or "frequency" - type of word encoding to use.
- *  "threshold": -0.38,   // value between -0.38 (default) & 0.86 for English, and -0.86 (default) & 3.35 for Spanish
+ *  "threshold": -0.38,   // number between -0.38 (default) & 0.86 for English, and -0.86 (default) & 3.35 for Spanish
  *  "bigrams": true,      // match against bigrams in lexicon (not recommended for large strings)
  *  "trigrams": true      // match against trigrams in lexicon (not recommended for large strings)
- * }
+ * };
  * const str = "A big long string of text...";
  * const wellbeing = wba(str, opts);
- * console.log(wellbeing)
+ * console.log(wellbeing);
  *
  * @param {string} str  input string
  * @param {Object} opts options object
@@ -133,20 +137,24 @@
   * @return {number} lexical value
   */
   const calcLex = (obj, wc, int, enc) => {
+    // error prevention
     if (obj == null) return null
+    if (wc != null && typeof wc !== 'number') wc = Number(wc)
+    if (int != null && typeof int !== 'number') int = Number(int)
+    // calculate lexical values
     let lex = 0
     let word
     for (word in obj) {
       if (!obj.hasOwnProperty(word)) continue
-      if (enc === 'binary' || enc == null || wc == null) {
+      if (enc === 'frequency' && wc != null) {
+        // (frequency / wordcount) * weight
+        lex += (Number(obj[word][1]) / wc) * Number(obj[word][2])
+      } else {
         // weight + weight + weight etc
         lex += Number(obj[word][2])
-      } else {
-        // (frequency / wordcount) * weight
-        lex += (Number(obj[word][1]) / Number(wc)) * Number(obj[word][2])
       }
     }
-    if (int != null) lex += Number(int)
+    if (int != null) lex += int
     return lex
   }
 
@@ -159,8 +167,8 @@
   */
   const analyse = (arr, opts, wc) => {
     // pick the right lexicon language
+    const es = (opts.lang.match(/(spanish|espanol)/gi))
     let lexicon = english
-    let es = (opts.lang.match(/(spanish|espanol)/gi))
     if (es) lexicon = spanish
     // get matches from array
     const matches = getMatches(arr, lexicon, opts.threshold)
@@ -221,21 +229,25 @@
     if (str == null) return null
     // make sure str is a string
     if (typeof str !== 'string') str = str.toString()
-    // trim whitespace and convert to lowercase
+    // convert to lowercase and trim whitespace
     str = str.toLowerCase().trim()
     // option defaults
     if (opts == null) {
       opts = {
         'lang': 'english',    // lexicon to analyse against
         'encoding': 'binary', // word encoding
-        'threshold': -999,    // minimum weight threshold
+        'threshold': -0.38,   // minimum weight threshold
         'bigrams': true,      // match bigrams?
         'trigrams': true      // match trigrams?
       }
     }
     opts.encoding = opts.encoding || 'binary'
     opts.lang = opts.lang || 'english'
-    opts.threshold = opts.threshold || -999 // default to -999 in order to include everything
+    if (opts.lang === 'spanish' || opts.lang === 'espanol') {
+      opts.threshold = opts.threshold || -0.86 // default to -0.86 in order to include everything in the Spanish lexicon
+    } else {
+      opts.threshold = opts.threshold || -0.38 // default to -0.38 in order to include everything in the English lexicon
+    }
     // convert our string to tokens
     let tokens = tokenizer(str)
     // return null on no tokens
