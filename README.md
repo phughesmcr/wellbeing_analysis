@@ -14,9 +14,7 @@ const wba = require("wellbeing_analysis");
 const opts = {
   "lang": "english",      // "english" (default) or "spanish" / "espanol"
   "encoding": "binary",   // "binary" (default), or "frequency" - type of word encoding to use.
-  "threshold": -0.38,     // number between -0.38 (default) & 0.86 for English, and -0.86 (default) & 3.35 for Spanish
-  "bigrams": true,        // match against bigrams too?
-  "trigrams": true        // match against trigrams too?
+  "threshold": -0.38      // number between -0.38 (default) & 0.86 for English, and -0.86 (default) & 3.35 for Spanish
 };
 const str = "A string of text....";
 const wellbeing = wba(str, opts);
@@ -49,12 +47,6 @@ A string - valid options: "binary" (default), or "frequency".
 "frequency" calculates the lexical value as (word frequency / total wordcount) * word weight
 
 Unless you have a specific need for frequency encoding, we recommend you use binary only.
-
-### "bigrams" and "trigrams"
-
-Boolean.
-
-The lexicon includes strings that are between one and three words in length. By default we will match against these using bi-grams and tri-grams, however you may want to disable these when analysing very long strings to save processing time and memory use.
 
 ## Output Example
 wellbeing_analysis outputs an object containing the lexical usage values for each of the PERMA domains, both positive and negative.

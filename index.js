@@ -1,6 +1,6 @@
 /**
  * wellbeing_analysis
- * v0.3.2
+ * v0.4.0
  *
  * Analyse positive / negative wellbeing expression in English or Spanish strings
  *
@@ -26,9 +26,7 @@
  *  // options are case sensitive
  *  "lang": "english",    // "english" or "spanish" / "espanol"
  *  "encoding": "binary", // "binary" (default), or "frequency" - type of word encoding to use.
- *  "threshold": -0.38,   // number between -0.38 (default) & 0.86 for English, and -0.86 (default) & 3.35 for Spanish
- *  "bigrams": true,      // match against bigrams in lexicon (not recommended for large strings)
- *  "trigrams": true      // match against trigrams in lexicon (not recommended for large strings)
+ *  "threshold": -0.38   // number between -0.38 (default) & 0.86 for English, and -0.86 (default) & 3.35 for Spanish
  * };
  * const str = "A big long string of text...";
  * const wellbeing = wba(str, opts);
@@ -47,22 +45,28 @@
   let tokenizer = root.tokenizer
   let english = root.english
   let spanish = root.spanish
-  let natural = root.natural
+  let simplengrams = root.simplengrams
 
   if (typeof tokenizer === 'undefined') {
     if (typeof require !== 'undefined') {
       tokenizer = require('happynodetokenizer')
       english = require('./data/english.json')
       spanish = require('./data/spanish.json')
-      natural = require('natural')
-    } else throw new Error('wellbeingAnalysis requires happynodetokenizer, natural and associated lexica files.')
+      simplengrams = require('simplengrams')
+    } else throw new Error('wellbeingAnalysis requires happynodetokenizer, simplengrams and associated lexica files.')
   }
 
-  // get number of times el appears in an array
-  function indexesOf (arr, el) {
+  /**
+   * Get the indexes of duplicate elements in an array
+   * @function indexesOf
+   * @param  {Array} arr input array
+   * @param  {string} el element to test against
+   * @return {Array} array of indexes
+   */
+  const indexesOf = (arr, el) => {
     const idxs = []
-    let i = arr.length - 1
-    for (i; i >= 0; i--) {
+    let i = arr.length
+    while (i--) {
       if (arr[i] === el) {
         idxs.unshift(i)
       }
@@ -71,22 +75,17 @@
   }
 
   /**
-  * Get all the n-grams of a string and return as an array
-  * @function getNGrams
-  * @param {string} str input string
-  * @param {number} n abitrary n-gram number, e.g. 2 = bigrams
-  * @return {Array} array of ngram strings
-  */
-  const getNGrams = (str, n) => {
-    // default to bi-grams on null n
-    if (n == null) n = 2
-    if (typeof n !== 'number') n = Number(n)
-    const ngrams = natural.NGrams.ngrams(str, n)
-    const len = ngrams.length
-    const result = []
+   * Combines multidimensional array elements into strings
+   * @function arr2string
+   * @param  {Array} arr input array
+   * @return {Array} output array
+   */
+  const arr2string = arr => {
     let i = 0
+    const len = arr.length
+    const result = []
     for (i; i < len; i++) {
-      result.push(ngrams[i].join(' '))
+      result.push(arr[i].join(' '))
     }
     return result
   }
@@ -236,9 +235,7 @@
       opts = {
         'lang': 'english',    // lexicon to analyse against
         'encoding': 'binary', // word encoding
-        'threshold': -0.38,   // minimum weight threshold
-        'bigrams': true,      // match bigrams?
-        'trigrams': true      // match trigrams?
+        'threshold': -0.38   // minimum weight threshold
       }
     }
     opts.encoding = opts.encoding || 'binary'
@@ -254,15 +251,14 @@
     if (tokens == null) return null
     // get wordcount before we add n-grams
     const wordcount = tokens.length
-    // handle bi-grams if wanted
-    if (opts.bigrams) {
-      const bigrams = getNGrams(str, 2)
-      tokens = tokens.concat(bigrams)
-    }
-    // handle tri-grams if wanted
-    if (opts.trigrams) {
-      const trigrams = getNGrams(str, 3)
-      tokens = tokens.concat(trigrams)
+    // get n-grams
+    const ngrams = []
+    ngrams.push(arr2string(simplengrams(str, 2)))
+    ngrams.push(arr2string(simplengrams(str, 3)))
+    const nLen = ngrams.length
+    let i = 0
+    for (i; i < nLen; i++) {
+      tokens = tokens.concat(ngrams[i])
     }
     // predict and return
     return analyse(tokens, opts, wordcount)
