@@ -1,8 +1,6 @@
 # wellbeing_analysis
-![Standard - JavaScript Style Guide](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)
 
 Analyse positive / negative [PERMA](https://en.wikipedia.org/wiki/Martin_Seligman#PERMA) expressions in English or Spanish strings, using PERMA lexicon from the [WWBP](http://www.wwbp.org/lexica.html).
-
 
 ## Disclaimer
 
@@ -10,45 +8,26 @@ Wellbeing_Analysis is provided for educational and entertainment purposes only. 
 
 ## Usage
 ```javascript
-const wba = require("wellbeing_analysis");
-const opts = {
-  "lang": "english",      // "english" (default) or "spanish" / "espanol"
-  "encoding": "binary",   // "binary" (default), or "frequency" - type of word encoding to use.
-  "threshold": -0.38      // number between -0.38 (default) & 0.86 for English, and -0.86 (default) & 3.35 for Spanish
+const wba = require('wellbeing_analysis');
+const opts = {  // These are the default options
+  'encoding': 'binary',
+  'lang': 'english',
+  'max': Number.POSITIVE_INFINITY,
+  'min': Number.NEGATIVE_INFINITY,
+  'nGrams': true,
+  'output': 'perma',
+  'places': 16,
+  'sortBy': 'freq',
+  'wcGrams': false,
 };
-const str = "A string of text....";
+const str = 'A string of text....';
 const wellbeing = wba(str, opts);
 console.log(wellbeing);
 ```
 
 Errors return null
 
-## Options
-### "lang"
-"english" (default), or "spanish" - language of the lexicon to use.
-
-### "threshold"
-A number - minimum token weight to match.
-
-Each item in the lexicon data has an associated weight (number). A higher threshold results in fewer matches.
-
-For English, -0.37 (default) will include everything from the lexicon, 0.85 will include nothing.
-
-For Spanish, -0.85 (default) will include everything from the lexicon, 3.32 will include nothing.
-
-If a threshold is not specified the module will default to -999 to ensure everything is included.
-
-### "encoding"
-
-A string - valid options: "binary" (default), or "frequency".
-
-"binary" calculates the lexical value as simply a sum of weights, i.e. weight[1] + weight[2] + etc...
-
-"frequency" calculates the lexical value as (word frequency / total wordcount) * word weight
-
-Unless you have a specific need for frequency encoding, we recommend you use binary only.
-
-## Output Example
+## Default Output Example
 wellbeing_analysis outputs an object containing the lexical usage values for each of the PERMA domains, both positive and negative.
 
 ```javascript
@@ -67,10 +46,110 @@ wellbeing_analysis outputs an object containing the lexical usage values for eac
 ```
 "POS_" / "NEG_" = positive / negative.
 
+## The Options Object
+
+The options object is optional and provides a number of controls to allow you to tailor the output to your needs. However, for general use it is recommended that all options are left to their defaults.
+
+### "encoding"
+
+A string - valid options: "binary" (default), or "frequency".
+
+"binary" calculates the lexical value as simply a sum of weights, i.e. weight[1] + weight[2] + etc...
+
+"frequency" calculates the lexical value as (word frequency / total wordcount) * word weight
+
+Unless you have a specific need for frequency encoding, we recommend you use binary only.
+
+### 'lang'
+
+**String - valid options: 'english' (default), or 'spanish'**
+
+The language of the lexicon to use.
+
+### 'max' and 'min'
+
+**Float**
+
+Each item in the lexicon data has an associated weight (number). Use these options to exclude words that have weights above the max threshold or below the min threshold.
+
+By default these are set to infinity, ensuring that no words from the lexicon are excluded.
+
+For English, -0.37 (default) will include everything from the lexicon, 0.85 will include nothing.
+
+For Spanish, -0.85 (default) will include everything from the lexicon, 3.32 will include nothing.
+
+### 'nGrams'
+
+**Boolean - valid options: true (default) or false**
+
+n-Grams are contiguous pieces of text, bi-grams being chunks of 2, tri-grams being chunks of 3, etc.
+
+Use the nGrams option to include (true) or exclude (false) n-grams. For accuracy it is recommended that n-grams are included, however including n-grams for very long strings can detrement performance.
+
+### 'output'
+
+**String - valid options: 'perma' (default), 'matches', 'full'**
+
+'perma' (default) returns an object of lexical values. See 'Defauly Output Example above.
+
+'matches' returns an object with data about matched words. See 'matches output example' below.
+
+'full' returns both of the above in one object with two keys, 'values' and 'matches'.
+
+### 'places'
+
+**Number - valid options between 0 and 20 inclusive.**
+
+Number of decimal places to limit outputted values to.
+
+The default is 16 decimal places as this is accuracy level the lexicon data provides.
+
+### 'sortBy'
+
+**String - valid options: 'lex' (default), 'weight', or 'freq'**
+
+If 'output' = 'matches', this option can be used to control how the outputted array is sorted.
+
+'lex' (default) sorts by final lexical value, (N.B. when using binary encoding [see 'encoding' above] the lexical value and the weight are identical.)
+
+'weight' sorts the array by the matched words initial weight.
+
+'freq' sorts by word frequency, i.e. the most used words appear first.
+
+### 'wcGrams'
+
+**Boolean - valid options: true or false (default)**
+
+When set to true, the output from the nGrams option will be added to the word count.
+
+For accuracy it is recommended that this is set to false.
+
+## {output: 'matches'} Output Example
+
+```javascript
+{
+  POS_P:
+    [
+      [ 'magnificent', 1, -192.0206116, -1.3914537072463768 ],
+      [ 'capital', 1, -133.9311307, -0.9705154398550726 ],
+      [ 'note', 3, -34.83417005, -0.7572645663043478 ],
+      [ 'america', 2, -49.21227355, -0.7132213557971014 ],
+      [ 'republic', 1, -75.5720402, -0.5476234797101449 ]
+    ],
+  POS_E:
+    [
+      ....
+    ],
+  ...
+};
+```
+
+The items in each array represent: [0] - the word, [1] - number of appearances in string (frequency), [2] - the word's weight, [3] - its final lexical value.
+
 ## Acknowledgements
 
 ### References
-[Schwartz, H. A., Eichstaedt, J. C., Kern, M. L., Dziurzynski, L., Ramones, S. M., Agrawal, M., Shah, A., Kosinski, M., Stillwell, D., Seligman, M. E., & Ungar, L. H. (2013). Personality, gender, and age in the language of social media: The Open-Vocabulary Approach. PLOS ONE, 8(9), . . e73791.](https://scholar.google.com/citations?view_op=view_citation&hl=en&user=Na16PsUAAAAJ&citation_for_view=Na16PsUAAAAJ:u-x6o8ySG0sC)
+[Schwartz, H.A., Sap, M., Kern, M.L., Eichstaedt, J.C., Kapelner, A., Agrawal, M., Blanco, E., Dziurzynski, L., Park, G., Stillwell, D. & Kosinski, M. (2016). Predicting individual well-being through the language of social media. In Biocomputing 2016: Proceedings of the Pacific Symposium (pp. 516-527).](http://wwbp.org/papers/2016_predicting_wellbeing.pdf)
 
 ### Lexicon
 Using the PERMA lexicon data from the [WWBP](http://www.wwbp.org/lexica.html). Used under the [Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported](http://creativecommons.org/licenses/by-nc-sa/3.0/)
