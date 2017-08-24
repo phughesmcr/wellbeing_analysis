@@ -16,7 +16,7 @@ const opts = {  // These are the default options
   'min': Number.NEGATIVE_INFINITY,
   'nGrams': true,
   'output': 'perma',
-  'places': 16,
+  'places': 9,
   'sortBy': 'freq',
   'wcGrams': false,
 };
@@ -102,19 +102,19 @@ Use the nGrams option to include (true) or exclude (false) n-grams. For accuracy
 
 Number of decimal places to limit outputted values to.
 
-The default is 16 decimal places as this is accuracy level the lexicon data provides.
+The default is 9 decimal places.
 
 ### 'sortBy'
 
-**String - valid options: 'lex' (default), 'weight', or 'freq'**
+**String - valid options: 'freq' (default), 'weight', or 'lex'**
 
 If 'output' = 'matches', this option can be used to control how the outputted array is sorted.
 
-'lex' (default) sorts by final lexical value, (N.B. when using binary encoding [see 'encoding' above] the lexical value and the weight are identical.)
+'lex' sorts by final lexical value, (N.B. when using binary encoding [see 'encoding' above] the lexical value and the weight are identical.)
 
 'weight' sorts the array by the matched words initial weight.
 
-'freq' sorts by word frequency, i.e. the most used words appear first.
+'freq' (default) sorts by word frequency, i.e. the most used words appear first.
 
 ### 'wcGrams'
 

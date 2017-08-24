@@ -1,6 +1,6 @@
 /**
  * wellbeing_analysis
- * v1.0.0-rc.1
+ * v1.0.0-rc.2
  *
  * Analyse positive / negative PERMA wellbeing expression
  * in English or Spanish strings.
@@ -37,7 +37,7 @@
  *  'min': Number.NEGATIVE_INFINITY,
  *  'nGrams': true,
  *  'output': 'perma',
- *  'places': 16,
+ *  'places': 9,
  *  'sortBy': 'freq',
  *  'wcGrams': false,
  * };
@@ -153,7 +153,7 @@
         'min': Number.NEGATIVE_INFINITY,
         'nGrams': true,
         'output': 'perma',
-        'places': 16,
+        'places': 9,
         'sortBy': 'freq',
         'wcGrams': false,
       };
@@ -164,7 +164,7 @@
     opts.min = opts.min || Number.NEGATIVE_INFINITY;
     opts.nGrams = opts.nGrams || true;
     opts.output = opts.output || 'perma';
-    opts.places = opts.places || 16;
+    opts.places = opts.places || 9;
     opts.sortBy = opts.sortBy || 'freq';
     opts.wcGrams = opts.wcGrams || false;
     const encoding = opts.encoding;
