@@ -1,6 +1,6 @@
 {
   "name": "wellbeing_analysis",
-  "version": "1.0.0-rc.4",
+  "version": "1.0.0-rc.5",
   "description": "Analyse psychological wellbeing (PERMA) as expressed in English or Spanish strings.",
   "main": "index.js",
   "dependencies": {
