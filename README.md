@@ -14,11 +14,11 @@ const opts = {  // These are the default options
   'lang': 'english',
   'max': Number.POSITIVE_INFINITY,
   'min': Number.NEGATIVE_INFINITY,
-  'nGrams': true,
+  'nGrams': 'true',
   'output': 'lex',
   'places': 9,
   'sortBy': 'freq',
-  'wcGrams': false,
+  'wcGrams': 'true',
 };
 const str = 'A string of text....';
 const wellbeing = wba(str, opts);
@@ -32,16 +32,16 @@ wellbeing_analysis outputs an object containing the lexical usage values for eac
 
 ```javascript
 {
-  POS_P: 1.30630732799999993,
-  POS_E: 0.5958824519999999,
-  POS_R: 0.2675181425,
-  POS_M: 1.9665244059,
-  POS_A: 0.6969340592000001,
-  NEG_P: 0.826628165,
-  NEG_E: -0.012260966700000014,
-  NEG_R: 0.31149285169999996,
-  NEG_M: -1.23064807439999996,
-  NEG_A: 0.24929312429999995
+  POS_P: 1.30630732,
+  POS_E: 0.59588245,
+  POS_R: 0.26751814,
+  POS_M: 1.96652440,
+  POS_A: 0.69693405,
+  NEG_P: 0.82662816,
+  NEG_E: -0.0122609,
+  NEG_R: 0.31149285,
+  NEG_M: -1.2306480,
+  NEG_A: 0.24929312,
 }
 ```
 "POS_" / "NEG_" = positive / negative.
