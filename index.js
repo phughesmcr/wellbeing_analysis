@@ -1,6 +1,6 @@
 /**
  * wellbeing_analysis
- * v1.0.0-rc.2
+ * v1.0.0-rc.3
  *
  * Analyse positive / negative PERMA wellbeing expression
  * in English or Spanish strings.
@@ -35,11 +35,11 @@
  *  'lang': 'english',
  *  'max': Number.POSITIVE_INFINITY,
  *  'min': Number.NEGATIVE_INFINITY,
- *  'nGrams': true,
- *  'output': 'perma',
+ *  'nGrams': 'true',
+ *  'output': 'lex',
  *  'places': 9,
  *  'sortBy': 'freq',
- *  'wcGrams': false,
+ *  'wcGrams': 'false',
  * };
  * const str = 'A big long string of text...';
  * const wellbeing = wba(str, opts);
@@ -57,29 +57,31 @@
   const global = this;
   const previous = global.wellbeingAnalysis;
 
-  let tokenizer = global.tokenizer;
   let english = global.english;
-  let spanish = global.spanish;
-  let simplengrams = global.simplengrams;
   let lexHelpers = global.lexHelpers;
+  let simplengrams = global.simplengrams;
+  let spanish = global.spanish;
+  let tokenizer = global.tokenizer;
 
   if (typeof tokenizer === 'undefined') {
     if (typeof require !== 'undefined') {
       english = require('./data/english.json');
+      lexHelpers = require('lex-helpers');
+      simplengrams = require('simplengrams');
       spanish = require('./data/spanish.json');
       tokenizer = require('happynodetokenizer');
-      simplengrams = require('simplengrams');
-      lexHelpers = require('lex-helpers');
     } else throw new Error('wellbeing_analysis required modules not found!');
   }
 
   const arr2string = lexHelpers.arr2string;
-  const prepareMatches = lexHelpers.prepareMatches;
-  const getMatches = lexHelpers.getMatches;
   const calcLex = lexHelpers.calcLex;
+  const getMatches = lexHelpers.getMatches;
+  const prepareMatches = lexHelpers.prepareMatches;
+
+
 
   const doMatches = (matches, sortBy, wordcount, places, encoding) => {
-    let match = {};
+    const match = {};
     match.POS_P = prepareMatches(matches.POS_P, sortBy, wordcount, places,
         encoding);
     match.POS_E = prepareMatches(matches.POS_E, sortBy, wordcount, places,
@@ -151,22 +153,22 @@
         'lang': 'english',
         'max': Number.POSITIVE_INFINITY,
         'min': Number.NEGATIVE_INFINITY,
-        'nGrams': true,
+        'nGrams': 'true',
         'output': 'perma',
         'places': 9,
         'sortBy': 'freq',
-        'wcGrams': false,
+        'wcGrams': 'false',
       };
     }
     opts.encoding = opts.encoding || 'binary';
     opts.lang = opts.lang || 'english';
     opts.max = opts.max || Number.POSITIVE_INFINITY;
     opts.min = opts.min || Number.NEGATIVE_INFINITY;
-    opts.nGrams = opts.nGrams || true;
+    opts.nGrams = opts.nGrams || 'true';
     opts.output = opts.output || 'perma';
     opts.places = opts.places || 9;
     opts.sortBy = opts.sortBy || 'freq';
-    opts.wcGrams = opts.wcGrams || false;
+    opts.wcGrams = opts.wcGrams || 'false';
     const encoding = opts.encoding;
     const output = opts.output;
     const places = opts.places;

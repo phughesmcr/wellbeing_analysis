@@ -15,7 +15,7 @@ const opts = {  // These are the default options
   'max': Number.POSITIVE_INFINITY,
   'min': Number.NEGATIVE_INFINITY,
   'nGrams': true,
-  'output': 'perma',
+  'output': 'lex',
   'places': 9,
   'sortBy': 'freq',
   'wcGrams': false,
@@ -80,7 +80,7 @@ For Spanish, -0.85 (default) will include everything from the lexicon, 3.32 will
 
 ### 'nGrams'
 
-**Boolean - valid options: true (default) or false**
+**String - valid options: 'true' (default) or 'false'**
 
 n-Grams are contiguous pieces of text, bi-grams being chunks of 2, tri-grams being chunks of 3, etc.
 
@@ -88,9 +88,9 @@ Use the nGrams option to include (true) or exclude (false) n-grams. For accuracy
 
 ### 'output'
 
-**String - valid options: 'perma' (default), 'matches', 'full'**
+**String - valid options: 'lex' (default), 'matches', 'full'**
 
-'perma' (default) returns an object of lexical values. See 'Defauly Output Example above.
+'lex' (default) returns an object of lexical values. See 'Defauly Output Example above.
 
 'matches' returns an object with data about matched words. See 'matches output example' below.
 
@@ -118,7 +118,7 @@ If 'output' = 'matches', this option can be used to control how the outputted ar
 
 ### 'wcGrams'
 
-**Boolean - valid options: true or false (default)**
+**String - valid options: 'true' or 'false' (default)**
 
 When set to true, the output from the nGrams option will be added to the word count.
 
