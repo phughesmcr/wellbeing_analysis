@@ -1,6 +1,6 @@
 /**
  * wellbeing_analysis
- * v1.0.0-rc.3
+ * v1.0.0-rc.4
  *
  * Analyse positive / negative PERMA wellbeing expression
  * in English or Spanish strings.
@@ -77,8 +77,6 @@
   const calcLex = lexHelpers.calcLex;
   const getMatches = lexHelpers.getMatches;
   const prepareMatches = lexHelpers.prepareMatches;
-
-
 
   const doMatches = (matches, sortBy, wordcount, places, encoding) => {
     const match = {};
@@ -183,13 +181,13 @@
     // get wordcount before we add ngrams
     let wordcount = tokens.length;
     // get n-grams
-    if (opts.nGrams) {
+    if (opts.nGrams.toLowerCase() === 'true') {
       const bigrams = arr2string(simplengrams(str, 2));
       const trigrams = arr2string(simplengrams(str, 3));
       tokens = tokens.concat(bigrams, trigrams);
     }
     // recalculate wordcount if wcGrams is true
-    if (opts.wcGrams) wordcount = tokens.length;
+    if (opts.wcGrams.toLowerCase() === 'true') wordcount = tokens.length;
     // pick the right lexicon language
     const es = (opts.lang.match(/(spanish|espanol)/gi));
     let lexicon = english;
@@ -236,7 +234,7 @@
           encoding);
       return wellbeing;
     } else {
-      if (output !== 'perma') {
+      if (output !== 'lex') {
         console.warn('wellbeing_analysis: output option ("' + output +
             '") is invalid, defaulting to "perma".');
       }
