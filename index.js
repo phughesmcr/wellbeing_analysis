@@ -1,11 +1,11 @@
 /**
  * wellbeing_analysis
- * v1.0.0
+ * v1.0.1
  *
  * Analyse positive / negative PERMA wellbeing expression
  * in English or Spanish strings.
  *
- * DISCLAIMER
+ * DISCLAIMER:
  * Wellbeing_Analysis is provided for educational and entertainment purposes
  * only. It does not provide, and is not a substitute for, medical advice
  * or diagnosis.
@@ -49,7 +49,7 @@
  *
  * @param {string} str  input string
  * @param {Object} opts options object
- * @return {Object} PERMA object
+ * @return {Object}     PERMA object
  */
 
 'use strict'
@@ -130,9 +130,9 @@
 
   /**
   * @function wellbeingAnalysis
-  * @param {string} str  input string
-  * @param {Object} opts options object
-  * @return {Object} PERMA object
+  * @param {string} str   input string
+  * @param {Object} opts  options object
+  * @return {Object}      PERMA object
   */
   const wellbeingAnalysis = (str, opts) => {
     // no string return null
@@ -193,7 +193,18 @@
     let lexicon = english;
     if (es) lexicon = spanish;
     // set intercept value
-    let int;
+    let int = {
+      POS_P: 0,
+      POS_E: 0,
+      POS_R: 0,
+      POS_M: 0,
+      POS_A: 0,
+      NEG_P: 0,
+      NEG_E: 0,
+      NEG_R: 0,
+      NEG_M: 0,
+      NEG_A: 0,
+    };
     if (es) {
       int = {
         POS_P: 2.675173871,
@@ -206,19 +217,6 @@
         NEG_R: 1.782788984,
         NEG_M: 1.52890284,
         NEG_A: 2.482131179,
-      };
-    } else {
-      int = {
-        POS_P: 0,
-        POS_E: 0,
-        POS_R: 0,
-        POS_M: 0,
-        POS_A: 0,
-        NEG_P: 0,
-        NEG_E: 0,
-        NEG_R: 0,
-        NEG_M: 0,
-        NEG_A: 0,
       };
     }
     // get matches from array
