@@ -181,18 +181,15 @@
     // get wordcount before we add ngrams
     let wordcount = tokens.length;
     // get n-grams
-    if (opts.nGrams.toLowerCase() === 'true') {
+    if (opts.nGrams === 'true') {
       const bigrams = arr2string(simplengrams(str, 2));
       const trigrams = arr2string(simplengrams(str, 3));
       tokens = tokens.concat(bigrams, trigrams);
     }
     // recalculate wordcount if wcGrams is true
-    if (opts.wcGrams.toLowerCase() === 'true') wordcount = tokens.length;
-    // pick the right lexicon language
-    const es = (opts.lang.match(/(spanish|espanol)/gi));
-    let lexicon = english;
-    if (es) lexicon = spanish;
+    if (opts.wcGrams === 'true') wordcount = tokens.length;
     // set intercept value
+    let lexicon = english;
     let int = {
       POS_P: 0,
       POS_E: 0,
@@ -205,7 +202,9 @@
       NEG_M: 0,
       NEG_A: 0,
     };
-    if (es) {
+    // use spanish lexicon if selected
+    if (opts.lang.match(/(spanish|espanol)/gi)) {
+      lexicon = spanish;
       int = {
         POS_P: 2.675173871,
         POS_E: 2.055179283,

@@ -131,22 +131,25 @@ For accuracy it is recommended that this is set to false.
 ```javascript
 {
   POS_P:
-    [
+    matches: [
       [ 'magnificent', 1, -192.0206116, -1.3914537072463768 ],
       [ 'capital', 1, -133.9311307, -0.9705154398550726 ],
       [ 'note', 3, -34.83417005, -0.7572645663043478 ],
       [ 'america', 2, -49.21227355, -0.7132213557971014 ],
       [ 'republic', 1, -75.5720402, -0.5476234797101449 ],
-      info: {
-        total_matches: 200,
-        total_tokens: 100,
-        percent_matches: 50,
-      },
     ],
+    info: {
+      total_matches: 200,
+      total_tokens: 100,
+      percent_matches: 50,
+    },
   POS_E:
-    [
+    matches: [
       ....
     ],
+    info: {
+      ....
+    }
   ...
 };
 ```
