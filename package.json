@@ -1,11 +1,11 @@
 {
   "name": "wellbeing_analysis",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Analyse psychological wellbeing (PERMA) as expressed in English or Spanish strings.",
   "main": "index.js",
   "dependencies": {
     "happynodetokenizer": "0.2.1",
-    "lex-helpers": "0.0.5",
+    "lex-helpers": "0.1.1",
     "simplengrams": "0.1.2"
   },
   "keywords": [
@@ -14,14 +14,15 @@
     "wellbeing",
     "PERMA",
     "SWL",
-    "Seligman",
     "lexica",
     "lexicon",
     "mental",
     "health",
     "Spanish",
     "Espanol",
-    "sentiment"
+    "sentiment",
+    "emotion",
+    "psychological"
   ],
   "author": "P. Hughes <peter@phugh.es> (http://www.phugh.es)",
   "license": "CC-BY-NC-SA-3.0",

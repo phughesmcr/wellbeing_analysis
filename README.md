@@ -52,13 +52,15 @@ The options object is optional and provides a number of controls to allow you to
 
 ### "encoding"
 
-A string - valid options: "binary" (default), or "frequency".
+A string - valid options: "binary" (default), "frequency", or "percent".
 
 "binary" calculates the lexical value as simply a sum of weights, i.e. weight[1] + weight[2] + etc...
 
 "frequency" calculates the lexical value as (word frequency / total wordcount) * word weight
 
-Unless you have a specific need for frequency encoding, we recommend you use binary only.
+"percent" calculates the percentage of matched tokens in the string for each category, returned as a decimal (i.e. 0.48 = 48%)
+
+Unless you have a specific need for other encoding types, we recommend you use binary only.
 
 ### 'lang'
 
@@ -134,7 +136,12 @@ For accuracy it is recommended that this is set to false.
       [ 'capital', 1, -133.9311307, -0.9705154398550726 ],
       [ 'note', 3, -34.83417005, -0.7572645663043478 ],
       [ 'america', 2, -49.21227355, -0.7132213557971014 ],
-      [ 'republic', 1, -75.5720402, -0.5476234797101449 ]
+      [ 'republic', 1, -75.5720402, -0.5476234797101449 ],
+      info: {
+        total_matches: 200,
+        total_tokens: 100,
+        percent_matches: 50,
+      },
     ],
   POS_E:
     [

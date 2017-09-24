@@ -1,6 +1,6 @@
 /**
  * wellbeing_analysis
- * v1.0.1
+ * v1.0.2
  *
  * Analyse positive / negative PERMA wellbeing expression
  * in English or Spanish strings.
