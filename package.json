@@ -1,11 +1,12 @@
 {
   "name": "wellbeing_analysis",
-  "version": "1.0.3",
+  "version": "2.0.0",
   "description": "Analyse psychological wellbeing (PERMA) as expressed in English or Spanish strings.",
   "main": "index.js",
   "dependencies": {
+    "async": "^2.6.0",
     "happynodetokenizer": "0.2.1",
-    "lex-helpers": "0.1.1",
+    "lex-helpers": "0.2.0",
     "simplengrams": "0.1.2"
   },
   "keywords": [

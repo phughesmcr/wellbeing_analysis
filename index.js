@@ -1,12 +1,12 @@
 /**
  * wellbeing_analysis
- * v1.0.2
+ * v2.0.0
  *
  * Analyse positive / negative PERMA wellbeing expression
  * in English or Spanish strings.
  *
  * DISCLAIMER:
- * Wellbeing_Analysis is provided for educational and entertainment purposes
+ * wellbeing_analysis is provided for educational and entertainment purposes
  * only. It does not provide, and is not a substitute for, medical advice
  * or diagnosis.
  *
@@ -52,11 +52,12 @@
  * @return {Object}     PERMA object
  */
 
-'use strict'
-;(function() {
+(function() {
+  'use strict';
   const global = this;
   const previous = global.wellbeingAnalysis;
 
+  let async = global.async;
   let english = global.english;
   let lexHelpers = global.lexHelpers;
   let simplengrams = global.simplengrams;
@@ -65,6 +66,7 @@
 
   if (typeof tokenizer === 'undefined') {
     if (typeof require !== 'undefined') {
+      async = require('async');
       english = require('./data/english.json');
       lexHelpers = require('lex-helpers');
       simplengrams = require('simplengrams');
@@ -77,54 +79,29 @@
   const calcLex = lexHelpers.calcLex;
   const getMatches = lexHelpers.getMatches;
   const prepareMatches = lexHelpers.prepareMatches;
+  const itemCount = lexHelpers.itemCount;
 
   const doMatches = (matches, sortBy, wordcount, places, encoding) => {
     const match = {};
-    match.POS_P = prepareMatches(matches.POS_P, sortBy, wordcount, places,
-        encoding);
-    match.POS_E = prepareMatches(matches.POS_E, sortBy, wordcount, places,
-        encoding);
-    match.POS_R = prepareMatches(matches.POS_R, sortBy, wordcount, places,
-        encoding);
-    match.POS_M = prepareMatches(matches.POS_M, sortBy, wordcount, places,
-        encoding);
-    match.POS_A = prepareMatches(matches.POS_A, sortBy, wordcount, places,
-        encoding);
-    match.NEG_P = prepareMatches(matches.NEG_P, sortBy, wordcount, places,
-        encoding);
-    match.NEG_E = prepareMatches(matches.NEG_E, sortBy, wordcount, places,
-        encoding);
-    match.NEG_R = prepareMatches(matches.NEG_R, sortBy, wordcount, places,
-        encoding);
-    match.NEG_M = prepareMatches(matches.NEG_M, sortBy, wordcount, places,
-        encoding);
-    match.NEG_A = prepareMatches(matches.NEG_A, sortBy, wordcount, places,
-        encoding);
+    async.each(Object.keys(matches), function(cat, callback) {
+      match[cat] = prepareMatches(matches[cat], sortBy, wordcount, places,
+          encoding);
+      callback();
+    }, function(err) {
+      if (err) console.error(err);
+    });
     return match;
   };
 
   const doLex = (matches, int, places, encoding, wordcount) => {
     const values = {};
-    values.POS_P = calcLex(matches.POS_P, int.POS_P, places, encoding,
-        wordcount);
-    values.POS_E = calcLex(matches.POS_E, int.POS_E, places, encoding,
-        wordcount);
-    values.POS_R = calcLex(matches.POS_R, int.POS_R, places, encoding,
-        wordcount);
-    values.POS_M = calcLex(matches.POS_M, int.POS_M, places, encoding,
-        wordcount);
-    values.POS_A = calcLex(matches.POS_A, int.POS_A, places, encoding,
-        wordcount);
-    values.NEG_P = calcLex(matches.NEG_P, int.NEG_P, places, encoding,
-        wordcount);
-    values.NEG_E = calcLex(matches.NEG_E, int.NEG_E, places, encoding,
-        wordcount);
-    values.NEG_R = calcLex(matches.NEG_R, int.NEG_R, places, encoding,
-        wordcount);
-    values.NEG_M = calcLex(matches.NEG_M, int.NEG_M, places, encoding,
-        wordcount);
-    values.NEG_A = calcLex(matches.NEG_A, int.NEG_A, places, encoding,
-        wordcount);
+    async.each(Object.keys(matches), function(cat, callback) {
+      values[cat] = calcLex(matches[cat], int[cat], places, encoding,
+          wordcount);
+      callback();
+    }, function(err) {
+      if (err) console.error(err);
+    });
     return values;
   };
 
@@ -143,7 +120,7 @@
     // if str isn't a string, make it into one
     if (typeof str !== 'string') str = str.toString();
     // trim whitespace and convert to lowercase
-    str = str.toLowerCase().trim();
+    str = str.trim().toLowerCase();
     // options defaults
     if (!opts || typeof opts !== 'object') {
       opts = {
@@ -181,13 +158,24 @@
     // get wordcount before we add ngrams
     let wordcount = tokens.length;
     // get n-grams
-    if (opts.nGrams === 'true') {
-      const bigrams = arr2string(simplengrams(str, 2));
-      const trigrams = arr2string(simplengrams(str, 3));
-      tokens = tokens.concat(bigrams, trigrams);
+    if (opts.nGrams === 'true' && wordcount > 2) {
+      async.parallel([
+        function(callback) {
+          callback(null, arr2string(simplengrams(str, 2)));
+        },
+        function(callback) {
+          callback(null, arr2string(simplengrams(str, 3)));
+        },
+      ],
+      function(err, res) {
+        if (err) console.error(err);
+        tokens = tokens.concat(res[0], res[1]);
+      });
     }
     // recalculate wordcount if wcGrams is true
     if (opts.wcGrams === 'true') wordcount = tokens.length;
+    // reduce tokens to count item
+    tokens = itemCount(tokens);
     // set intercept value
     let lexicon = english;
     let int = {
@@ -203,7 +191,7 @@
       NEG_A: 0,
     };
     // use spanish lexicon if selected
-    if (opts.lang.match(/(spanish|espanol)/gi)) {
+    if (opts.lang === 'spanish' || opts.lang === 'espanol') {
       lexicon = spanish;
       int = {
         POS_P: 2.675173871,
@@ -225,11 +213,10 @@
       return doMatches(matches, sortBy, wordcount, places, encoding);
     } else if (output === 'full') {
       // return matches and values
-      const wellbeing = {};
-      wellbeing.values = doLex(matches, int, places, encoding, wordcount);
-      wellbeing.matches = doMatches(matches, sortBy, wordcount, places,
-          encoding);
-      return wellbeing;
+      return {
+        values: doLex(matches, int, places, encoding, wordcount),
+        matches: doMatches(matches, sortBy, wordcount, places, encoding),
+      };
     } else {
       if (output !== 'lex') {
         console.warn('wellbeing_analysis: output option ("' + output +
