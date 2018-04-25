@@ -12,23 +12,27 @@ const wba = require('wellbeing_analysis');
 const opts = {  // These are the default options
   'encoding': 'binary',
   'lang': 'english',
+  'locale': 'US',
+  'logs': 3,
   'max': Number.POSITIVE_INFINITY,
   'min': Number.NEGATIVE_INFINITY,
-  'nGrams': 'true',
+  'nGrams': [2, 3],
   'output': 'lex',
   'places': 9,
   'sortBy': 'freq',
-  'wcGrams': 'true',
+  'wcGrams': 'false',
 };
 const str = 'A string of text....';
 const wellbeing = wba(str, opts);
 console.log(wellbeing);
 ```
 
-Errors return null
+
 
 ## Default Output Example
 wellbeing_analysis outputs an object containing the lexical usage values for each of the PERMA domains, both positive and negative.
+
+Errors return null
 
 ```javascript
 {
@@ -82,11 +86,41 @@ For Spanish, -0.85 (default) will include everything from the lexicon, 3.32 will
 
 ### 'nGrams'
 
-**String - valid options: 'true' (default) or 'false'**
+**Array - valid options: [ number, number, ...]**
 
 n-Grams are contiguous pieces of text, bi-grams being chunks of 2, tri-grams being chunks of 3, etc.
 
-Use the nGrams option to include (true) or exclude (false) n-grams. For accuracy it is recommended that n-grams are included, however including n-grams for very long strings can detrement performance.
+Use the nGrams option to include n-gram chunks. For example if you want to include both bi-grams and tri-grams, use like so:
+
+```javascript
+{
+  nGrams: [2, 3]
+}
+```
+
+If you only want to include tri-grams:
+
+```javascript
+{
+  nGrams: [3]
+}
+```
+
+If the number of words in the string is less than the ngram number provided, the option will simply be ignored.
+
+For accuracy it is recommended that n-grams are included, however including n-grams for very long strings can detrement performance.
+
+### 'locale'
+**String - valid options: 'US' (default), 'GB'**
+The English lexicon data is in American English (US), if the string(s) you want to analyse are in British English set the locale option to 'GB'.
+
+### 'logs'
+**Number - valid options: 0, 1, 2, 3 (default)**
+Used to control console.log, console.warn, and console.error outputs.
+* 0 = suppress all logs
+* 1 = print errors only
+* 2 = print errors and warnings
+* 3 = print all console logs
 
 ### 'output'
 
@@ -162,9 +196,9 @@ The items in each array represent: [0] - the word, [1] - number of appearances i
 [Schwartz, H.A., Sap, M., Kern, M.L., Eichstaedt, J.C., Kapelner, A., Agrawal, M., Blanco, E., Dziurzynski, L., Park, G., Stillwell, D. & Kosinski, M. (2016). Predicting individual well-being through the language of social media. In Biocomputing 2016: Proceedings of the Pacific Symposium (pp. 516-527).](http://wwbp.org/papers/2016_predicting_wellbeing.pdf)
 
 ### Lexicon
-Using the PERMA lexicon data from the [WWBP](http://www.wwbp.org/lexica.html). Used under the [Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported](http://creativecommons.org/licenses/by-nc-sa/3.0/)
+Using the PERMA lexicon data from the [WWBP](http://www.wwbp.org/lexica.html). Used under the [Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported](http://creativecommons.org/licenses/by-nc-sa/3.0/) license.
 
-## Licence
-(C) 2017 [P. Hughes](www.phugh.es).
+## License
+(C) 2017-18 [P. Hughes](https://www.phugh.es). All rights reserved.
 
-[Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported](http://creativecommons.org/licenses/by-nc-sa/3.0/).
+Shared under the [Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported](http://creativecommons.org/licenses/by-nc-sa/3.0/) license.

@@ -1,6 +1,6 @@
 /**
  * wellbeing_analysis
- * v2.0.0
+ * v3.0.0
  *
  * Analyse positive / negative PERMA wellbeing expression
  * in English or Spanish strings.
@@ -33,9 +33,11 @@
  * const opts = {  // These are the default options
  *  'encoding': 'binary',
  *  'lang': 'english',
+ *  'locale': 'US',
+ *  'logs': 3,
  *  'max': Number.POSITIVE_INFINITY,
  *  'min': Number.NEGATIVE_INFINITY,
- *  'nGrams': 'true',
+ *  'nGrams': [2, 3],
  *  'output': 'lex',
  *  'places': 9,
  *  'sortBy': 'freq',
@@ -54,56 +56,22 @@
 
 (function() {
   'use strict';
-  const global = this;
-  const previous = global.wellbeingAnalysis;
 
-  let async = global.async;
-  let english = global.english;
-  let lexHelpers = global.lexHelpers;
-  let simplengrams = global.simplengrams;
-  let spanish = global.spanish;
-  let tokenizer = global.tokenizer;
+  // Lexicon data
+  const english = require('./data/english.json');
+  const spanish = require('./data/spanish.json');
 
-  if (typeof tokenizer === 'undefined') {
-    if (typeof require !== 'undefined') {
-      async = require('async');
-      english = require('./data/english.json');
-      lexHelpers = require('lex-helpers');
-      simplengrams = require('simplengrams');
-      spanish = require('./data/spanish.json');
-      tokenizer = require('happynodetokenizer');
-    } else throw new Error('wellbeing_analysis required modules not found!');
-  }
-
+  // External modules
+  const async = require('async');
+  const trans = require('british_american_translate');
+  const simplengrams = require('simplengrams');
+  const tokenizer = require('happynodetokenizer');
+  const lexHelpers = require('lex-helpers');
   const arr2string = lexHelpers.arr2string;
-  const calcLex = lexHelpers.calcLex;
+  const doLex = lexHelpers.doLex;
+  const doMatches = lexHelpers.doMatches;
   const getMatches = lexHelpers.getMatches;
-  const prepareMatches = lexHelpers.prepareMatches;
   const itemCount = lexHelpers.itemCount;
-
-  const doMatches = (matches, sortBy, wordcount, places, encoding) => {
-    const match = {};
-    async.each(Object.keys(matches), function(cat, callback) {
-      match[cat] = prepareMatches(matches[cat], sortBy, wordcount, places,
-          encoding);
-      callback();
-    }, function(err) {
-      if (err) console.error(err);
-    });
-    return match;
-  };
-
-  const doLex = (matches, int, places, encoding, wordcount) => {
-    const values = {};
-    async.each(Object.keys(matches), function(cat, callback) {
-      values[cat] = calcLex(matches[cat], int[cat], places, encoding,
-          wordcount);
-      callback();
-    }, function(err) {
-      if (err) console.error(err);
-    });
-    return values;
-  };
 
   /**
   * @function wellbeingAnalysis
@@ -111,74 +79,80 @@
   * @param {Object} opts  options object
   * @return {Object}      PERMA object
   */
-  const wellbeingAnalysis = (str, opts) => {
+  const wellbeingAnalysis = (str, opts = {}) => {
+    // default options
+    opts.encoding = (typeof opts.encoding !== 'undefined') ? opts.encoding : 'binary';
+    opts.lang = (typeof opts.lang !== 'undefined') ? opts.lang : 'english';
+    opts.locale = (typeof opts.locale !== 'undefined') ? opts.locale : 'US';
+    opts.logs = (typeof opts.logs !== 'undefined') ? opts.logs : 3;
+    if (opts.suppressLog) opts.logs = 0;
+    opts.max = (typeof opts.max !== 'undefined') ? opts.max : Number.POSITIVE_INFINITY;
+    opts.min = (typeof opts.min !== 'undefined') ? opts.min : Number.NEGATIVE_INFINITY;
+    if (typeof opts.max !== 'number' || typeof opts.min !== 'number') {
+      // try to convert to a number
+      opts.min = Number(opts.min);
+      opts.max = Number(opts.max);
+      // check it worked, or else default to infinity
+      opts.max = (typeof opts.max !== 'number') ? opts.max : Number.POSITIVE_INFINITY;
+      opts.min = (typeof opts.min !== 'number') ? opts.min : Number.NEGATIVE_INFINITY;
+    }
+    opts.nGrams = (typeof opts.nGrams !== 'undefined') ? opts.nGrams : [2, 3];
+    if (!Array.isArray(opts.nGrams)) {
+      if (opts.logs > 1) {
+        console.warn('wellbeingAnalysis: nGrams option must be an array! ' + 
+            'Defaulting to [2, 3].');
+      }
+      opts.nGrams = [2, 3];
+    }
+    opts.output = (typeof opts.output !== 'undefined') ? opts.output : 'lex';
+    opts.places = (typeof opts.places !== 'undefined') ? opts.places : 9;
+    opts.sortBy = (typeof opts.sortBy !== 'undefined') ? opts.sortBy : 'freq';
+    opts.wcGrams = (typeof opts.wcGrams !== 'undefined') ? opts.wcGrams : false;
+    // cache frequently used options
+    const encoding = opts.encoding;
+    const logs = opts.logs;
+    const nGrams = opts.nGrams;
+    const output = opts.output;
+    const places = opts.places;
+    const sortBy = opts.sortBy;
     // no string return null
     if (!str) {
-      console.error('wellbeing_analysis: no string found. Returning null.');
+      if (opts.logs > 1) console.warn('wellbeingAnalysis: no string found. Returning null.');
       return null;
     }
     // if str isn't a string, make it into one
     if (typeof str !== 'string') str = str.toString();
     // trim whitespace and convert to lowercase
     str = str.trim().toLowerCase();
-    // options defaults
-    if (!opts || typeof opts !== 'object') {
-      opts = {
-        'encoding': 'binary',
-        'lang': 'english',
-        'max': Number.POSITIVE_INFINITY,
-        'min': Number.NEGATIVE_INFINITY,
-        'nGrams': 'true',
-        'output': 'lex',
-        'places': 9,
-        'sortBy': 'freq',
-        'wcGrams': 'false',
-      };
-    }
-    opts.encoding = opts.encoding || 'binary';
-    opts.lang = opts.lang || 'english';
-    opts.max = opts.max || Number.POSITIVE_INFINITY;
-    opts.min = opts.min || Number.NEGATIVE_INFINITY;
-    opts.nGrams = opts.nGrams || 'true';
-    opts.output = opts.output || 'lex';
-    opts.places = opts.places || 9;
-    opts.sortBy = opts.sortBy || 'freq';
-    opts.wcGrams = opts.wcGrams || 'false';
-    const encoding = opts.encoding;
-    const output = opts.output;
-    const places = opts.places;
-    const sortBy = opts.sortBy;
+    // translalte US English to UK English if selected
+    if (opts.locale === 'GB') str = trans.uk2us(str);
     // convert our string to tokens
-    let tokens = tokenizer(str);
+    let tokens = tokenizer(str, {logs: opts.logs});
     // if there are no tokens return null
     if (!tokens) {
-      console.warn('wellbeing_analysis: no tokens found. Returned null.');
+      if (logs > 1) console.warn('wellbeingAnalysis: no tokens found. Returned null.');
       return null;
     }
     // get wordcount before we add ngrams
     let wordcount = tokens.length;
     // get n-grams
-    if (opts.nGrams === 'true' && wordcount > 2) {
-      async.parallel([
-        function(callback) {
-          callback(null, arr2string(simplengrams(str, 2)));
-        },
-        function(callback) {
-          callback(null, arr2string(simplengrams(str, 3)));
-        },
-      ],
-      function(err, res) {
-        if (err) console.error(err);
-        tokens = tokens.concat(res[0], res[1]);
+    if (nGrams) {
+      async.each(nGrams, function(n, callback) {
+        if (wordcount < n) {
+          callback(`wellbeingAnalysis: wordcount (${wordcount}) less than n-gram value (${n}). Ignoring.`);
+        } else {
+          tokens = [...arr2string(simplengrams(str, n, {logs: logs})), ...tokens];
+          callback();
+        }
+      }, function(err) {
+        if (err && logs > 0) console.error('wellbeingAnalysis: nGram error: ', err);        
       });
     }
     // recalculate wordcount if wcGrams is true
-    if (opts.wcGrams === 'true') wordcount = tokens.length;
-    // reduce tokens to count item
-    tokens = itemCount(tokens);
+    if (opts.wcGrams) wordcount = tokens.length;
     // set intercept value
     let lexicon = english;
-    let int = {
+    let ints = {
       POS_P: 0,
       POS_E: 0,
       POS_R: 0,
@@ -191,9 +165,9 @@
       NEG_A: 0,
     };
     // use spanish lexicon if selected
-    if (opts.lang === 'spanish' || opts.lang === 'espanol') {
+    if (output.match(/spanish/gi) || output.match(/espanol/gi)) {
       lexicon = spanish;
-      int = {
+      ints = {
         POS_P: 2.675173871,
         POS_E: 2.055179283,
         POS_R: 1.977389757,
@@ -207,29 +181,32 @@
       };
     }
     // get matches from array
-    const matches = getMatches(tokens, lexicon, opts.min, opts.max);
-    if (output === 'matches') {
+    const matches = getMatches(itemCount(tokens), lexicon, opts.min, opts.max);
+    // returns
+    if (output.match(/matches/gi)) {
       // return requested output
       return doMatches(matches, sortBy, wordcount, places, encoding);
-    } else if (output === 'full') {
-      // return matches and values
-      return {
-        values: doLex(matches, int, places, encoding, wordcount),
-        matches: doMatches(matches, sortBy, wordcount, places, encoding),
-      };
+    } else if (output.match(/full/gi)) {
+      // return matches and values in one object
+      async.parallel({
+        matches: function(callback) {
+          callback(null, doMatches(matches, sortBy, wordcount, places, encoding));
+        },
+        values: function(callback) {
+          callback(null, doLex(matches, ints, places, encoding, wordcount));
+        },
+      }, function(err, results) {
+        if (err && logs > 0) console.error(err);
+        return results;
+      });
     } else {
-      if (output !== 'lex') {
-        console.warn('wellbeing_analysis: output option ("' + output +
+      if (!output.match(/lex/gi) && logs > 1) {
+        console.warn('wellbeingAnalysis: output option ("' + output +
             '") is invalid, defaulting to "lex".');
       }
       // return just the values
-      return doLex(matches, int, places, encoding, wordcount);
+      return doLex(matches, ints, places, encoding, wordcount);
     }
-  };
-
-  wellbeingAnalysis.noConflict = function() {
-    global.wellbeingAnalysis = previous;
-    return wellbeingAnalysis;
   };
 
   if (typeof exports !== 'undefined') {
@@ -240,4 +217,4 @@
   } else {
     global.wellbeingAnalysis = wellbeingAnalysis;
   }
-}).call(this);
+})();
