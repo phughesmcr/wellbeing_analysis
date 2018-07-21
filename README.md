@@ -190,6 +190,21 @@ For accuracy it is recommended that this is set to false.
 
 The items in each array represent: [0] - the word, [1] - number of appearances in string (frequency), [2] - the word's weight, [3] - its final lexical value.
 
+## English Lexicon Weight Ranges
+
+|Aspect | Min | Max |
+| ------------- |:-------------:|:---------:|
+POS_P| -0.366392522|  0.7654900333|
+POS_E| -0.3007389199| 0.3406524774|
+POS_R| -0.288835072|  0.7837603493|
+POS_M| -0.1674776443| 0.7716732077|
+POS_A| -0.1978446382| 0.5503079623|
+NEG_P| -0.3273133959| 0.7069694553|
+NEG_E| -0.1522958765| 0.8401683729|
+NEG_R| -0.2864831665| 0.6203329277|
+NEG_M| -0.1498686845| 0.3167416933|
+NEG_A| -0.1536902119| 0.2475999626|
+
 ## Acknowledgements
 
 ### References
