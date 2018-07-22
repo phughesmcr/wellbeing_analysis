@@ -1,19 +1,19 @@
 # wellbeing_analysis
 
-Analyse positive / negative [PERMA](https://en.wikipedia.org/wiki/Martin_Seligman#PERMA) expressions in English or Spanish strings, using PERMA lexicon from the [WWBP](http://www.wwbp.org/lexica.html).
+Analyse message-level positive / negative [PERMA](https://en.wikipedia.org/wiki/Martin_Seligman#PERMA) expressions in English or Spanish strings, using the weighted PERMA lexica from the [WWBP](http://www.wwbp.org/lexica.html).
 
 ## Disclaimer
 
-Wellbeing_Analysis is provided for educational and entertainment purposes only. It does not provide, and is not a substitute for, medical advice or diagnosis.
+Wellbeing_Analysis is provided for educational and entertainment purposes only. It does not provide, and is not a substitute for, medical or psychological advice or diagnosis.
 
 ## Usage
 ```javascript
 const wba = require('wellbeing_analysis');
-const opts = {  // These are the default options
+const opts = {  // These are the default and recommended options
   'encoding': 'binary',
   'lang': 'english',
   'locale': 'US',
-  'logs': 3,
+  'logs': 2,
   'max': Number.POSITIVE_INFINITY,
   'min': Number.NEGATIVE_INFINITY,
   'nGrams': [2, 3],
@@ -26,8 +26,6 @@ const str = 'A string of text....';
 const wellbeing = wba(str, opts);
 console.log(wellbeing);
 ```
-
-
 
 ## Default Output Example
 wellbeing_analysis outputs an object containing the lexical usage values for each of the PERMA domains, both positive and negative.
@@ -56,7 +54,7 @@ The options object is optional and provides a number of controls to allow you to
 
 ### "encoding"
 
-A string - valid options: "binary" (default), "frequency", or "percent".
+**string - valid options: "binary" (default), "frequency", or "percent"**
 
 "binary" calculates the lexical value as simply a sum of weights, i.e. weight[1] + weight[2] + etc...
 
@@ -72,11 +70,27 @@ Unless you have a specific need for other encoding types, we recommend you use b
 
 The language of the lexicon to use.
 
+### 'locale'
+
+**String - valid options: 'US' (default), 'GB'**
+
+The English lexicon data is in American English (US), if the string(s) you want to analyse are in British English set the locale option to 'GB'.
+
+This is ignored if 'lang' is set to 'spanish'.
+
+### 'logs'
+**Number - valid options: 0, 1, 2 (default), 3**
+Used to control console.log, console.warn, and console.error outputs.
+* 0 = suppress all logs
+* 1 = print errors only
+* 2 = print errors and warnings
+* 3 = print all console logs
+
 ### 'max' and 'min'
 
 **Float**
 
-Each item in the lexicon data has an associated weight (number). Use these options to exclude words that have weights above the max threshold or below the min threshold.
+Each item in the lexicon data has an associated weight (number). Use these options to exclude words that have weights beyond a given maximum or minimum threshold.
 
 By default these are set to infinity, ensuring that no words from the lexicon are excluded.
 
@@ -106,21 +120,25 @@ If you only want to include tri-grams:
 }
 ```
 
+To disable n-gram inclusion, use the following:
+
+```javascript
+{
+  nGrams: [0]
+}
+```
+
 If the number of words in the string is less than the ngram number provided, the option will simply be ignored.
 
-For accuracy it is recommended that n-grams are included, however including n-grams for very long strings can detrement performance.
+For accuracy it is recommended that n-grams are included, however including n-grams for very long strings can affect performance.
 
-### 'locale'
-**String - valid options: 'US' (default), 'GB'**
-The English lexicon data is in American English (US), if the string(s) you want to analyse are in British English set the locale option to 'GB'.
+### 'noInt'
 
-### 'logs'
-**Number - valid options: 0, 1, 2, 3 (default)**
-Used to control console.log, console.warn, and console.error outputs.
-* 0 = suppress all logs
-* 1 = print errors only
-* 2 = print errors and warnings
-* 3 = print all console logs
+**Boolean - valid options: true or false (default)**
+
+The lexica contain intercept values, set noInt to true to ignore these values.
+
+Unless you have a specific need to ignore the intercepts, it is recommended you leave this set to false.
 
 ### 'output'
 
@@ -154,11 +172,11 @@ If 'output' = 'matches', this option can be used to control how the outputted ar
 
 ### 'wcGrams'
 
-**String - valid options: 'true' or 'false' (default)**
+**boolean - valid options: true or false (default)**
 
 When set to true, the output from the nGrams option will be added to the word count.
 
-For accuracy it is recommended that this is set to false.
+For accuracy it is strongly recommended that this is set to false.
 
 ## {output: 'matches'} Output Example
 
@@ -173,8 +191,8 @@ For accuracy it is recommended that this is set to false.
       [ 'republic', 1, -75.5720402, -0.5476234797101449 ],
     ],
     info: {
-      total_matches: 200,
-      total_tokens: 100,
+      total_matches: 100,
+      total_tokens: 200,
       percent_matches: 50,
     },
   POS_E:
@@ -215,5 +233,7 @@ Using the PERMA lexicon data from the [WWBP](http://www.wwbp.org/lexica.html). U
 
 ## License
 (C) 2017-18 [P. Hughes](https://www.phugh.es). All rights reserved.
+
+The PERMAv3 lexicon was created by Penn's World Well-being Project [WWBP](http://www.wwbp.org/) and is licensed under a [Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported](http://creativecommons.org/licenses/by-nc-sa/3.0/) License.
 
 Shared under the [Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported](http://creativecommons.org/licenses/by-nc-sa/3.0/) license.

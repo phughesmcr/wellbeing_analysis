@@ -1,0 +1,62 @@
+{
+    "POS_P": {
+        "_avg3gramsPerMsg": 0.1041516549,
+        "_avg3gramLength": 0.1041516549,
+        "_avg2gramLength": null,
+        "_avg2gramsPerMsg": null
+    },
+    "POS_E": {
+        "_avg2gramLength": 0.03143879,
+        "_avg2gramsPerMsg": 0.03143879,
+        "_avg3gramLength": 0.1367119,
+        "_avg3gramsPerMsg": 0.1367119
+    },
+    "POS_R": {
+        "_avg2gramLength": 0.0169008,
+        "_avg2gramsPerMsg": 0.0169008,
+        "_avg3gramLength": 0.136305299,
+        "_avg3gramsPerMsg": 0.136305299
+    },
+    "POS_M": {
+        "_avg3gramLength": 0.080118778,
+        "_avg3gramsPerMsg": 0.080118778,
+        "_avg2gramLength": null,
+        "_avg2gramsPerMsg": null
+    },
+    "POS_A": {
+        "_avg2gramLength": 0.04056627,
+        "_avg2gramsPerMsg": 0.04056627,
+        "_avg3gramLength": 0.056735751,
+        "_avg3gramsPerMsg": 0.056735751
+    },
+    "NEG_P": {
+        "_avg3gramLength": 0.069325547,
+        "_avg3gramsPerMsg": 0.069325547,
+        "_avg2gramLength": null,
+        "_avg2gramsPerMsg": null
+    },
+    "NEG_E": {
+        "_avg3gramsPerMsg": 0.041467336,
+        "_avg3gramLength": 0.041467336,
+        "_avg2gramLength": null,
+        "_avg2gramsPerMsg": null
+    },
+    "NEG_R": {
+        "_avg3gramLength": 0.051122623,
+        "_avg3gramsPerMsg": 0.051122623,
+        "_avg2gramLength": null,
+        "_avg2gramsPerMsg": null
+    },
+    "NEG_M": {
+        "_avg2gramLength": null,
+        "_avg2gramsPerMsg": null,
+        "_avg3gramLength": null,
+        "_avg3gramsPerMsg": null
+    },
+    "NEG_A": {
+        "_avg3gramLength": 0.055142299,
+        "_avg3gramsPerMsg": 0.055142299,
+        "_avg2gramLength": null,
+        "_avg2gramsPerMsg": null
+    }
+}

@@ -1,6 +1,6 @@
 /**
  * wellbeing_analysis
- * v3.0.1
+ * v3.1.0
  *
  * Analyse positive / negative PERMA wellbeing expression
  * in English or Spanish strings.
@@ -34,14 +34,15 @@
  *  'encoding': 'binary',
  *  'lang': 'english',
  *  'locale': 'US',
- *  'logs': 3,
+ *  'logs': 2,
  *  'max': Number.POSITIVE_INFINITY,
  *  'min': Number.NEGATIVE_INFINITY,
  *  'nGrams': [2, 3],
+ *  'noInt': false,
  *  'output': 'lex',
  *  'places': 9,
  *  'sortBy': 'freq',
- *  'wcGrams': 'false',
+ *  'wcGrams': false,
  * };
  * const str = 'A big long string of text...';
  * const wellbeing = wba(str, opts);
@@ -84,7 +85,7 @@
     opts.encoding = (typeof opts.encoding !== 'undefined') ? opts.encoding : 'binary';
     opts.lang = (typeof opts.lang !== 'undefined') ? opts.lang : 'english';
     opts.locale = (typeof opts.locale !== 'undefined') ? opts.locale : 'US';
-    opts.logs = (typeof opts.logs !== 'undefined') ? opts.logs : 3;
+    opts.logs = (typeof opts.logs !== 'undefined') ? opts.logs : 2;
     if (opts.suppressLog) opts.logs = 0;
     opts.max = (typeof opts.max !== 'undefined') ? opts.max : Number.POSITIVE_INFINITY;
     opts.min = (typeof opts.min !== 'undefined') ? opts.min : Number.NEGATIVE_INFINITY;
@@ -98,12 +99,15 @@
     }
     opts.nGrams = (typeof opts.nGrams !== 'undefined') ? opts.nGrams : [2, 3];
     if (!Array.isArray(opts.nGrams)) {
-      if (opts.logs > 1) {
+      if (opts.nGrams === 0 || opts.nGrams === '0') {
+        opts.nGrams = [0];
+      } else if (opts.logs > 1) {
         console.warn('wellbeingAnalysis: nGrams option must be an array! ' + 
             'Defaulting to [2, 3].');
+        opts.nGrams = [2, 3];
       }
-      opts.nGrams = [2, 3];
     }
+    opts.noInt = (typeof opts.noInt !== 'undefined') ? opts.noInt : false;
     opts.output = (typeof opts.output !== 'undefined') ? opts.output : 'lex';
     opts.places = (typeof opts.places !== 'undefined') ? opts.places : 9;
     opts.sortBy = (typeof opts.sortBy !== 'undefined') ? opts.sortBy : 'freq';
@@ -125,7 +129,7 @@
     // trim whitespace and convert to lowercase
     str = str.trim().toLowerCase();
     // translalte US English to UK English if selected
-    if (opts.locale === 'GB') str = trans.uk2us(str);
+    if (opts.lang.match(/english/gi) && opts.locale.match(/gb/gi)) str = trans.uk2us(str);
     // convert our string to tokens
     let tokens = tokenizer(str, {logs: opts.logs});
     // if there are no tokens return null
@@ -136,10 +140,10 @@
     // get wordcount before we add ngrams
     let wordcount = tokens.length;
     // get n-grams
-    if (nGrams) {
+    if (nGrams && nGrams[0] !== 0) {
       async.each(nGrams, function(n, callback) {
         if (wordcount < n) {
-          callback(`wellbeingAnalysis: wordcount (${wordcount}) less than n-gram value (${n}). Ignoring.`);
+          callback(`wordcount (${wordcount}) less than n-gram value (${n}). Ignoring.`);
         } else {
           tokens = [...arr2string(simplengrams(str, n, {logs: logs})), ...tokens];
           callback();
@@ -149,7 +153,7 @@
       });
     }
     // recalculate wordcount if wcGrams is true
-    if (opts.wcGrams) wordcount = tokens.length;
+    if (opts.wcGrams === true) wordcount = tokens.length;
     // set intercept value
     let lexicon = english;
     let ints = {
@@ -167,18 +171,20 @@
     // use spanish lexicon if selected
     if (output.match(/spanish/gi) || output.match(/espanol/gi)) {
       lexicon = spanish;
-      ints = {
-        POS_P: 2.675173871,
-        POS_E: 2.055179283,
-        POS_R: 1.977389757,
-        POS_M: 1.738298902,
-        POS_A: 3.414517804,
-        NEG_P: 2.50468297,
-        NEG_E: 1.673629622,
-        NEG_R: 1.782788984,
-        NEG_M: 1.52890284,
-        NEG_A: 2.482131179,
-      };
+      if (opts.noInt === false) {
+        ints = {
+          POS_P: 2.675173871,
+          POS_E: 2.055179283,
+          POS_R: 1.977389757,
+          POS_M: 1.738298902,
+          POS_A: 3.414517804,
+          NEG_P: 2.50468297,
+          NEG_E: 1.673629622,
+          NEG_R: 1.782788984,
+          NEG_M: 1.52890284,
+          NEG_A: 2.482131179,
+        };
+      }
     }
     // get matches from array
     const matches = getMatches(itemCount(tokens), lexicon, opts.min, opts.max);
@@ -188,6 +194,7 @@
       return doMatches(matches, sortBy, wordcount, places, encoding);
     } else if (output.match(/full/gi)) {
       // return matches and values in one object
+      let results;
       async.parallel({
         matches: function(callback) {
           callback(null, doMatches(matches, sortBy, wordcount, places, encoding));
@@ -195,10 +202,11 @@
         values: function(callback) {
           callback(null, doLex(matches, ints, places, encoding, wordcount));
         },
-      }, function(err, results) {
+      }, function(err, res) {
         if (err && logs > 0) console.error(err);
-        return results;
+        results = res;
       });
+      return results;
     } else {
       if (!output.match(/lex/gi) && logs > 1) {
         console.warn('wellbeingAnalysis: output option ("' + output +
