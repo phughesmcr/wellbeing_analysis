@@ -9,10 +9,13 @@
   },
   "globals": {},
   "rules": {
-    "no-trailing-spaces": 0,
     "semi": [2, "always"],
     "no-eq-null": 2,
     "no-console": 0,
-    "max-len": 0
+    "no-multi-spaces": 0,
+    "max-len": [2, 120, 4, {
+      "ignoreRegExpLiterals": true,
+      "ignoreUrls": true
+    }]
   }
 }

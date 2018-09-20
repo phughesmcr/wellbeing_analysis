@@ -9,18 +9,20 @@ Wellbeing_Analysis is provided for educational and entertainment purposes only. 
 ## Usage
 ```javascript
 const wba = require('wellbeing_analysis');
-const opts = {  // These are the default and recommended options
+// These are the default and recommended options
+const opts = {
   'encoding': 'binary',
   'lang': 'english',
   'locale': 'US',
-  'logs': 2,
+  'logs': 3,
   'max': Number.POSITIVE_INFINITY,
   'min': Number.NEGATIVE_INFINITY,
   'nGrams': [2, 3],
+  'noInt': false,
   'output': 'lex',
-  'places': 9,
+  'places': undefined,
   'sortBy': 'freq',
-  'wcGrams': 'false',
+  'wcGrams': false,
 };
 const str = 'A string of text....';
 const wellbeing = wba(str, opts);
@@ -28,9 +30,7 @@ console.log(wellbeing);
 ```
 
 ## Default Output Example
-wellbeing_analysis outputs an object containing the lexical usage values for each of the PERMA domains, both positive and negative.
-
-Errors return null
+Using the default options (i.e. {output: 'lex'}), wellbeing_analysis outputs an object containing the lexical usage values for each of the PERMA domains, both positive and negative, indicating the degree to which the text is poitively or negatively associated with that domain.
 
 ```javascript
 {
@@ -48,6 +48,8 @@ Errors return null
 ```
 "POS_" / "NEG_" = positive / negative.
 
+It is important to remember that the domains are independent, i.e. text being negatively associated with positive emotion (POS_P) does *not* neccessitate that the text also be positively associated with negative emotion. A string could contain both positive and negative emotion and thus be positively associated (i.e. scoring > 0) in both POS_P and NEG_P domains. 
+
 ## The Options Object
 
 The options object is optional and provides a number of controls to allow you to tailor the output to your needs. However, for general use it is recommended that all options are left to their defaults.
@@ -56,30 +58,34 @@ The options object is optional and provides a number of controls to allow you to
 
 **string - valid options: "binary" (default), "frequency", or "percent"**
 
-"binary" calculates the lexical value as simply a sum of weights, i.e. weight[1] + weight[2] + etc...
+*N.B - You probably don't want to change this, ever.*
 
-"frequency" calculates the lexical value as (word frequency / total wordcount) * word weight
+Controls how the lexical value is calculated.
 
-"percent" calculates the percentage of matched tokens in the string for each category, returned as a decimal (i.e. 0.48 = 48%)
+__Binary__ is simply the addition of lexical weights, i.e. word1 + word2 + word3.
 
-Unless you have a specific need for other encoding types, we recommend you use binary only.
+__Frequency__ encoding takes the overall wordcount and word frequency into account, i.e. (word frequency / word count) * weight. Note that the encoding option accepts either 'freq' or 'frequency' to enable this option.
+
+Another way to think of binary and frequency encoding is that 'binary' essentially sets all weights to '1', whereas frequency will generate a group norm. This is useful for predictive lexica, for example, when predicting age (see [predictAge](https://github.com/phugh/predictage)) we want to use frequency encoding because we care about the actual number generated - i.e. the lexical value *is* the predicted age. Whereas, when predicting wellbeing in this module 'binary' encoding is used because the final value doesn't particularly matter, only whether it is above or below 0 to indicate association.
+
+__Percent__ returns the percentage of total (non-unique) tokens matched against the lexicon in each category as a decimal, i.e. 0.48 = 48%.
 
 ### 'lang'
 
 **String - valid options: 'english' (default), or 'spanish'**
 
-The language of the lexicon to use.
+The language of the lexicon to use. This module is capable of analysing American English and Spanish strings. For International / British English, use the 'locale' option.
 
 ### 'locale'
 
 **String - valid options: 'US' (default), 'GB'**
 
-The English lexicon data is in American English (US), if the string(s) you want to analyse are in British English set the locale option to 'GB'.
+The English lexicon data is in American English (US), if the string(s) you want to analyse are in International / British English set the locale option to 'GB'.
 
 This is ignored if 'lang' is set to 'spanish'.
 
 ### 'logs'
-**Number - valid options: 0, 1, 2 (default), 3**
+**Number - valid options: 0, 1, 2, 3 (default)**
 Used to control console.log, console.warn, and console.error outputs.
 * 0 = suppress all logs
 * 1 = print errors only
@@ -88,7 +94,7 @@ Used to control console.log, console.warn, and console.error outputs.
 
 ### 'max' and 'min'
 
-**Float**
+**Number - accepts floats**
 
 Each item in the lexicon data has an associated weight (number). Use these options to exclude words that have weights beyond a given maximum or minimum threshold.
 
@@ -101,6 +107,8 @@ For Spanish, -0.85 (default) will include everything from the lexicon, 3.32 will
 ### 'nGrams'
 
 **Array - valid options: [ number, number, ...]**
+
+*N.B the lexicon contains unigrams, bigrams, and trigrams. Including a value > 3 makes no sense and will impact performance drastically.*
 
 n-Grams are contiguous pieces of text, bi-grams being chunks of 2, tri-grams being chunks of 3, etc.
 
@@ -156,7 +164,7 @@ Unless you have a specific need to ignore the intercepts, it is recommended you 
 
 Number of decimal places to limit outputted values to.
 
-The default is 9 decimal places.
+The default is "undefined" which will simply return the value unchanged.
 
 ### 'sortBy'
 
@@ -192,6 +200,7 @@ For accuracy it is strongly recommended that this is set to false.
     ],
     info: {
       total_matches: 100,
+      total_unique_matches: 63,
       total_tokens: 200,
       percent_matches: 50,
     },
@@ -207,6 +216,8 @@ For accuracy it is strongly recommended that this is set to false.
 ```
 
 The items in each array represent: [0] - the word, [1] - number of appearances in string (frequency), [2] - the word's weight, [3] - its final lexical value.
+
+The final lexical value is affected by which 'encoding' option you're using.
 
 ## English Lexicon Weight Ranges
 

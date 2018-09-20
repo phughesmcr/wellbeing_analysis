@@ -1,14 +1,17 @@
 {
   "name": "wellbeing_analysis",
-  "version": "3.1.0",
+  "version": "4.0.0",
   "description": "Analyse psychological wellbeing (PERMA) as expressed in English or Spanish strings.",
   "main": "index.js",
+  "engines": {
+    "node": ">=6.14.4"
+  },
   "dependencies": {
     "async": "^2.6.1",
-    "british_american_translate": "^1.0.1",
-    "happynodetokenizer": "^0.4.0",
-    "lex-helpers": "^0.3.1",
-    "simplengrams": "^0.3.2"
+    "british_american_translate": "^1.0.2",
+    "happynodetokenizer": "^0.4.1",
+    "lex-helpers": "^0.4.0",
+    "simplengrams": "^0.3.3"
   },
   "keywords": [
     "psychology",
@@ -20,6 +23,8 @@
     "lexicon",
     "mental",
     "health",
+    "predict",
+    "predictive",
     "Spanish",
     "Espanol",
     "sentiment",
